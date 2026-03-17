@@ -1,82 +1,402 @@
 [
-  "https://api.changes.tg/backdrop/Astral%20Shard/Black.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Electric%20Purple.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Lavender.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Cyberpunk.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Electric%20Indigo.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Neon%20Blue.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Navy%20Blue.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Sapphire.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Sky%20Blue.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Azure%20Blue.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Pacific%20Cyan.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Aquamarine.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Pacific%20Green.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Emerald.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Mint%20Green.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Malachite.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Shamrock%20Green.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Lemongrass.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Light%20Olive.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Satin%20Gold.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Pure%20Gold.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Amber.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Caramel.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Orange.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Carrot%20Juice.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Coral%20Red.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Persimmon.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Strawberry.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Raspberry.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Mystic%20Pearl.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Fandango.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Dark%20Lilac.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/English%20Violet.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Moonstone.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Pine%20Green.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Hunter%20Green.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Pistachio.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Khaki%20Green.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Desert%20Sand.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Cappuccino.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Rosewood.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Ivory%20White.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Platinum.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Roman%20Silver.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Steel%20Grey.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Silver%20Blue.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Burgundy.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Indigo%20Dye.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Midnight%20Blue.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Onyx%20Black.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Battleship%20Grey.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Purple.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Grape.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Cobalt%20Blue.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/French%20Blue.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Turquoise.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Jade%20Green.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Copper.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Chestnut.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Chocolate.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Marine%20Blue.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Tactical%20Pine.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Gunship%20Green.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Dark%20Green.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Seal%20Brown.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Rifle%20Green.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Ranger%20Green.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Camo%20Green.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Feldgrau.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Gunmetal.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Deep%20Cyan.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Mexican%20Pink.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Tomato.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Fire%20Engine.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Celtic%20Blue.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Old%20Gold.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Burnt%20Sienna.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Carmine.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/Mustard.png",
-  "https://api.changes.tg/backdrop/Astral%20Shard/French%20Violet.png"
+  {
+    "name": "Black",
+    "center": "#363738",
+    "edge": "#0e0f0f"
+  },
+  {
+    "name": "Electric Purple",
+    "center": "#ca70c6",
+    "edge": "#9662d4"
+  },
+  {
+    "name": "Lavender",
+    "center": "#b789e4",
+    "edge": "#8a5abc"
+  },
+  {
+    "name": "Cyberpunk",
+    "center": "#858ff3",
+    "edge": "#865fd3"
+  },
+  {
+    "name": "Electric Indigo",
+    "center": "#a980f3",
+    "edge": "#5b62d8"
+  },
+  {
+    "name": "Neon Blue",
+    "center": "#7596f9",
+    "edge": "#6862e4"
+  },
+  {
+    "name": "Navy Blue",
+    "center": "#6c9edd",
+    "edge": "#5c6ec9"
+  },
+  {
+    "name": "Sapphire",
+    "center": "#58a3c8",
+    "edge": "#5379c2"
+  },
+  {
+    "name": "Sky Blue",
+    "center": "#58b4c8",
+    "edge": "#538bc2"
+  },
+  {
+    "name": "Azure Blue",
+    "center": "#5db1cb",
+    "edge": "#448bab"
+  },
+  {
+    "name": "Pacific Cyan",
+    "center": "#5abea6",
+    "edge": "#3d95ba"
+  },
+  {
+    "name": "Aquamarine",
+    "center": "#60b195",
+    "edge": "#46abb4"
+  },
+  {
+    "name": "Pacific Green",
+    "center": "#6fc793",
+    "edge": "#3b9c84"
+  },
+  {
+    "name": "Emerald",
+    "center": "#78c585",
+    "edge": "#42a171"
+  },
+  {
+    "name": "Mint Green",
+    "center": "#7ecb82",
+    "edge": "#459e5a"
+  },
+  {
+    "name": "Malachite",
+    "center": "#95b457",
+    "edge": "#3d9755"
+  },
+  {
+    "name": "Shamrock Green",
+    "center": "#8ab163",
+    "edge": "#559345"
+  },
+  {
+    "name": "Lemongrass",
+    "center": "#aeb85a",
+    "edge": "#559345"
+  },
+  {
+    "name": "Light Olive",
+    "center": "#c2af64",
+    "edge": "#887e45"
+  },
+  {
+    "name": "Satin Gold",
+    "center": "#bf9b47",
+    "edge": "#8d7739"
+  },
+  {
+    "name": "Pure Gold",
+    "center": "#ccab41",
+    "edge": "#987b32"
+  },
+  {
+    "name": "Amber",
+    "center": "#dab345",
+    "edge": "#b1802a"
+  },
+  {
+    "name": "Caramel",
+    "center": "#d09932",
+    "edge": "#b77431"
+  },
+  {
+    "name": "Orange",
+    "center": "#d19a3a",
+    "edge": "#c06f47"
+  },
+  {
+    "name": "Carrot Juice",
+    "center": "#db9867",
+    "edge": "#c76f4f"
+  },
+  {
+    "name": "Coral Red",
+    "center": "#da896b",
+    "edge": "#c4654f"
+  },
+  {
+    "name": "Persimmon",
+    "center": "#e7a75a",
+    "edge": "#c5675f"
+  },
+  {
+    "name": "Strawberry",
+    "center": "#dd8e6f",
+    "edge": "#b75a60"
+  },
+  {
+    "name": "Raspberry",
+    "center": "#e07b85",
+    "edge": "#b65980"
+  },
+  {
+    "name": "Mystic Pearl",
+    "center": "#d08b6d",
+    "edge": "#b05770"
+  },
+  {
+    "name": "Fandango",
+    "center": "#e28ab6",
+    "edge": "#a4588b"
+  },
+  {
+    "name": "Dark Lilac",
+    "center": "#b17da5",
+    "edge": "#8c577a"
+  },
+  {
+    "name": "English Violet",
+    "center": "#b186bb",
+    "edge": "#875a91"
+  },
+  {
+    "name": "Moonstone",
+    "center": "#7eb1b4",
+    "edge": "#588390"
+  },
+  {
+    "name": "Pine Green",
+    "center": "#6ba97c",
+    "edge": "#3e7970"
+  },
+  {
+    "name": "Hunter Green",
+    "center": "#8fae78",
+    "edge": "#4b825b"
+  },
+  {
+    "name": "Pistachio",
+    "center": "#97b07c",
+    "edge": "#5c814c"
+  },
+  {
+    "name": "Khaki Green",
+    "center": "#adb070",
+    "edge": "#6b7d54"
+  },
+  {
+    "name": "Desert Sand",
+    "center": "#b39f82",
+    "edge": "#7e735b"
+  },
+  {
+    "name": "Cappuccino",
+    "center": "#b1907e",
+    "edge": "#7c6356"
+  },
+  {
+    "name": "Rosewood",
+    "center": "#b77a77",
+    "edge": "#814c52"
+  },
+  {
+    "name": "Ivory White",
+    "center": "#bab6b1",
+    "edge": "#a19d97"
+  },
+  {
+    "name": "Platinum",
+    "center": "#b2aea7",
+    "edge": "#88847e"
+  },
+  {
+    "name": "Roman Silver",
+    "center": "#a3a8b5",
+    "edge": "#7c808a"
+  },
+  {
+    "name": "Steel Grey",
+    "center": "#97a2ac",
+    "edge": "#63727c"
+  },
+  {
+    "name": "Silver Blue",
+    "center": "#80a4b8",
+    "edge": "#607c91"
+  },
+  {
+    "name": "Burgundy",
+    "center": "#a35e66",
+    "edge": "#6d414a"
+  },
+  {
+    "name": "Indigo Dye",
+    "center": "#537991",
+    "edge": "#416479"
+  },
+  {
+    "name": "Midnight Blue",
+    "center": "#5c6985",
+    "edge": "#354057"
+  },
+  {
+    "name": "Onyx Black",
+    "center": "#4d5254",
+    "edge": "#313638"
+  },
+  {
+    "name": "Battleship Grey",
+    "center": "#8c8c85",
+    "edge": "#6c6c66"
+  },
+  {
+    "name": "Purple",
+    "center": "#ae6cae",
+    "edge": "#844784"
+  },
+  {
+    "name": "Grape",
+    "center": "#9d74c1",
+    "edge": "#794da0"
+  },
+  {
+    "name": "Cobalt Blue",
+    "center": "#6088cf",
+    "edge": "#5162b8"
+  },
+  {
+    "name": "French Blue",
+    "center": "#5c9bc4",
+    "edge": "#37739a"
+  },
+  {
+    "name": "Turquoise",
+    "center": "#5ec0b8",
+    "edge": "#3d928e"
+  },
+  {
+    "name": "Jade Green",
+    "center": "#55c49c",
+    "edge": "#3b9977"
+  },
+  {
+    "name": "Copper",
+    "center": "#d08656",
+    "edge": "#9d6531"
+  },
+  {
+    "name": "Chestnut",
+    "center": "#be6f54",
+    "edge": "#994838"
+  },
+  {
+    "name": "Chocolate",
+    "center": "#a46e58",
+    "edge": "#74443b"
+  },
+  {
+    "name": "Marine Blue",
+    "center": "#4e689c",
+    "edge": "#3b4b7a"
+  },
+  {
+    "name": "Tactical Pine",
+    "center": "#44826b",
+    "edge": "#2f6369"
+  },
+  {
+    "name": "Gunship Green",
+    "center": "#558a65",
+    "edge": "#3d6657"
+  },
+  {
+    "name": "Dark Green",
+    "center": "#516341",
+    "edge": "#2b452f"
+  },
+  {
+    "name": "Seal Brown",
+    "center": "#664d45",
+    "edge": "#47362e"
+  },
+  {
+    "name": "Rifle Green",
+    "center": "#64695c",
+    "edge": "#4b5241"
+  },
+  {
+    "name": "Ranger Green",
+    "center": "#5f7849",
+    "edge": "#3c4f3b"
+  },
+  {
+    "name": "Camo Green",
+    "center": "#75944d",
+    "edge": "#547341"
+  },
+  {
+    "name": "Feldgrau",
+    "center": "#899288",
+    "edge": "#5e6b63"
+  },
+  {
+    "name": "Gunmetal",
+    "center": "#4c5d63",
+    "edge": "#2f3b42"
+  },
+  {
+    "name": "Deep Cyan",
+    "center": "#31b5aa",
+    "edge": "#189599"
+  },
+  {
+    "name": "Mexican Pink",
+    "center": "#e36692",
+    "edge": "#c9497c"
+  },
+  {
+    "name": "Tomato",
+    "center": "#e6793e",
+    "edge": "#d44e3f"
+  },
+  {
+    "name": "Fire Engine",
+    "center": "#f05f4f",
+    "edge": "#c43949"
+  },
+  {
+    "name": "Celtic Blue",
+    "center": "#45b8ed",
+    "edge": "#3886d9"
+  },
+  {
+    "name": "Old Gold",
+    "center": "#b58d38",
+    "edge": "#946925"
+  },
+  {
+    "name": "Burnt Sienna",
+    "center": "#d66f3c",
+    "edge": "#b54b2d"
+  },
+  {
+    "name": "Carmine",
+    "center": "#e0574a",
+    "edge": "#a8383b"
+  },
+  {
+    "name": "Mustard",
+    "center": "#d4980d",
+    "edge": "#c47712"
+  },
+  {
+    "name": "French Violet",
+    "center": "#c260e6",
+    "edge": "#914ed9"
+  }
 ]
