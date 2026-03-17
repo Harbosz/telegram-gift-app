@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gift Designer Pro</title>
+    <title>Gift Designer Premium</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -32,21 +32,15 @@
             overflow: hidden;
             position: relative;
             box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            transition: all 0.2s;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .slot-empty {
             border: 2px dashed rgba(0,0,0,0.1);
             background: linear-gradient(145deg, var(--bg-color), var(--sec-bg-color));
             box-shadow: none;
         }
-        .layer-bg {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            z-index: 1;
-        }
+        .slot-card:active { transform: scale(0.95); opacity: 0.9; }
+        
         .layer-gift {
             position: absolute;
             inset: 0;
@@ -57,11 +51,13 @@
             z-index: 2;
             filter: drop-shadow(0 10px 20px rgba(0,0,0,0.15));
         }
+        
         .bottom-sheet {
             transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
             transform: translateY(100%);
         }
         .bottom-sheet.open { transform: translateY(0); }
+        
         .select-custom {
             width: 100%;
             padding: 16px;
@@ -70,6 +66,7 @@
             font-weight: 600;
             appearance: none;
             outline: none;
+            font-size: 14px;
         }
     </style>
 </head>
@@ -101,14 +98,12 @@
                 <div v-for="(slot, index) in slots" :key="index" 
                      @click="openPicker(index)"
                      class="slot-card"
-                     :class="{'slot-empty': !slot.model}">
+                     :class="{'slot-empty': !slot.model}"
+                     :style="getBackdropStyle(slot.backdrop)">
                     
-                    <!-- Backdrop Layer -->
-                    <img v-if="slot.backdrop" :src="slot.backdrop" class="layer-bg">
-                    <!-- Gift Layer -->
                     <img v-if="slot.model" :src="slot.model.image_url" class="layer-gift">
                     
-                    <div v-if="!slot.model && !slot.backdrop" class="flex items-center justify-center h-full opacity-10">
+                    <div v-if="!slot.model" class="flex items-center justify-center h-full opacity-10">
                         <i class="fa-solid fa-plus text-xl"></i>
                     </div>
                 </div>
@@ -120,30 +115,29 @@
             <div class="w-20 h-20 bg-zinc-200 rounded-[30px] flex items-center justify-center mb-4 opacity-30">
                 <i class="fa-solid fa-box-archive text-3xl"></i>
             </div>
-            <h3 class="font-black italic uppercase text-zinc-400">Your Vault is Empty</h3>
+            <h3 class="font-black italic uppercase text-zinc-400">Vault</h3>
         </main>
 
         <!-- NAV -->
         <nav class="glass fixed bottom-6 left-6 right-6 h-20 rounded-[30px] flex justify-around items-center px-8 z-50 shadow-2xl border border-white/20">
             <div @click="activeTab = 'constructor'" :class="['flex flex-col items-center gap-1 transition-all', activeTab === 'constructor' ? 'text-blue-500 scale-110' : 'opacity-30']">
                 <i class="fa-solid fa-square-plus text-xl"></i>
-                <span class="text-[9px] font-black uppercase">Builder</span>
+                <span class="text-[9px] font-bold uppercase">Builder</span>
             </div>
             <div @click="activeTab = 'collections'" :class="['flex flex-col items-center gap-1 transition-all', activeTab === 'collections' ? 'text-blue-500 scale-110' : 'opacity-30']">
                 <i class="fa-solid fa-box-archive text-xl"></i>
-                <span class="text-[9px] font-black uppercase">Vault</span>
+                <span class="text-[9px] font-bold uppercase">Vault</span>
             </div>
         </nav>
 
         <!-- PICKER SHEET -->
         <div class="fixed inset-0 bg-black/60 z-[60] backdrop-blur-sm" v-if="pickerOpen" @click="pickerOpen = false"></div>
         <div :class="['fixed bottom-0 left-0 right-0 bg-white dark:bg-zinc-900 rounded-t-[40px] z-[70] p-8 bottom-sheet max-h-[90vh] overflow-y-auto shadow-2xl', pickerOpen ? 'open' : '']">
-            <div class="w-16 h-1.5 bg-zinc-200 rounded-full mx-auto mb-8"></div>
+            <div class="w-16 h-1.5 bg-zinc-200 dark:bg-zinc-700 rounded-full mx-auto mb-8"></div>
             
             <!-- LIVE PREVIEW -->
             <div class="flex justify-center mb-10">
-                <div class="w-56 h-56 slot-card shadow-2xl border-4 border-white">
-                    <img v-if="tempSelection.backdrop" :src="tempSelection.backdrop" class="layer-bg">
+                <div class="w-56 h-56 slot-card shadow-2xl border-4 border-white" :style="getBackdropStyle(tempSelection.backdrop)">
                     <img v-if="tempSelection.model" :src="tempSelection.model.image_url" class="layer-gift scale-110">
                     <div v-if="!tempSelection.model" class="flex items-center justify-center h-full opacity-10 text-4xl"><i class="fa-solid fa-cube"></i></div>
                 </div>
@@ -161,16 +155,16 @@
                 <div>
                     <label class="text-[10px] font-black uppercase tracking-widest opacity-40 ml-1 mb-2 block">Model</label>
                     <select v-model="tempSelection.model" :disabled="!tempSelection.baseGift" class="select-custom">
-                        <option :value="null">{{ tempSelection.baseGift ? 'Choose Style' : '🔒 Select gift first' }}</option>
+                        <option :value="null">{{ tempSelection.baseGift ? 'Choose Variation' : '🔒 Select gift first' }}</option>
                         <option v-for="m in filteredModels" :key="m.id" :value="m">{{ m.name.split(':')[1] }}</option>
                     </select>
                 </div>
 
                 <div>
-                    <label class="text-[10px] font-black uppercase tracking-widest opacity-40 ml-1 mb-2 block">Backdrop</label>
+                    <label class="text-[10px] font-black uppercase tracking-widest opacity-40 ml-1 mb-2 block">Color Palette</label>
                     <select v-model="tempSelection.backdrop" :disabled="!tempSelection.baseGift" class="select-custom">
-                        <option :value="null">{{ tempSelection.baseGift ? 'None' : '🔒 Select gift first' }}</option>
-                        <option v-for="b in commonBackdrops" :key="b" :value="b">{{ getBgName(b) }}</option>
+                        <option :value="null">{{ tempSelection.baseGift ? 'None (White)' : '🔒 Select gift first' }}</option>
+                        <option v-for="name in commonBackdrops" :key="name" :value="name">{{ name }}</option>
                     </select>
                 </div>
             </div>
@@ -197,6 +191,25 @@
                 const activeSlotIndex = ref(null);
                 const tempSelection = ref({ baseGift: '', model: null, backdrop: null });
 
+                // Карта градиентов Telegram
+                const colorMap = {
+                    'Blue': 'linear-gradient(180deg, #31A5F5 0%, #217CF5 100%)',
+                    'Cyan': 'linear-gradient(180deg, #2AC1F0 0%, #1A9BD0 100%)',
+                    'Green': 'linear-gradient(180deg, #6DC544 0%, #5BA53A 100%)',
+                    'Yellow': 'linear-gradient(180deg, #F7D147 0%, #E5B52E 100%)',
+                    'Orange': 'linear-gradient(180deg, #F7A347 0%, #E5852E 100%)',
+                    'Red': 'linear-gradient(180deg, #F74747 0%, #E52E2E 100%)',
+                    'Pink': 'linear-gradient(180deg, #F747A3 0%, #E52E85 100%)',
+                    'Purple': 'linear-gradient(180deg, #A347F7 0%, #852EE5 100%)',
+                    'Dark-Grey': 'linear-gradient(180deg, #4A4A4A 0%, #2B2B2B 100%)',
+                    'Light-Grey': 'linear-gradient(180deg, #D1D1D1 0%, #B0B0B0 100%)',
+                    'Black': 'linear-gradient(180deg, #1A1A1A 0%, #000000 100%)',
+                    'Gold': 'linear-gradient(180deg, #F0D080 0%, #C0A040 100%)',
+                    'Sun': 'linear-gradient(180deg, #FF9500 0%, #FF5E00 100%)',
+                    'Ocean': 'linear-gradient(180deg, #00C6FF 0%, #0072FF 100%)',
+                    'Neon': 'linear-gradient(180deg, #CCFF00 0%, #AAFF00 100%)'
+                };
+
                 const loadData = async () => {
                     try {
                         const ts = Date.now();
@@ -206,11 +219,18 @@
                         ]);
                         gifts.value = await gRes.json();
                         if (bRes.ok) commonBackdrops.value = await bRes.json();
-                    } catch (e) { console.error("Load error:", e); }
+                    } catch (e) { console.error(e); }
                 };
 
                 const uniqueGifts = computed(() => [...new Set(gifts.value.map(g => g.name.split(':')[0].trim()))]);
                 const filteredModels = computed(() => gifts.value.filter(g => g.name.startsWith(tempSelection.value.baseGift)));
+
+                const getBackdropStyle = (name) => {
+                    if (!name) return {};
+                    // Пытаемся найти точное совпадение или частичное
+                    const style = colorMap[name] || Object.keys(colorMap).find(k => name.includes(k));
+                    return style ? { background: colorMap[style] || style } : { background: '#f0f0f2' };
+                };
 
                 const openPicker = (index) => {
                     activeSlotIndex.value = index;
@@ -231,11 +251,6 @@
                 const resetSlot = () => { tempSelection.value = { baseGift: '', model: null, backdrop: null }; };
                 const onGiftChange = () => { tempSelection.value.model = null; tempSelection.value.backdrop = null; };
 
-                const getBgName = (url) => {
-                    try { return decodeURIComponent(url.split('/').pop().replace('.png', '')); }
-                    catch (e) { return 'Backdrop'; }
-                };
-
                 const addRow = () => slots.value.push(...Array(3).fill().map(() => ({ model: null, backdrop: null })));
                 const removeRow = () => { if (slots.value.length > 3) slots.value.splice(-3); };
 
@@ -246,7 +261,7 @@
                     tg.setHeaderColor(tg.themeParams.secondary_bg_color || '#f0f0f2');
                 });
 
-                return { activeTab, user, slots, addRow, removeRow, pickerOpen, tempSelection, uniqueGifts, filteredModels, commonBackdrops, openPicker, onGiftChange, saveSelection, resetSlot, getBgName };
+                return { activeTab, user, slots, addRow, removeRow, pickerOpen, tempSelection, uniqueGifts, filteredModels, commonBackdrops, openPicker, onGiftChange, saveSelection, resetSlot, getBackdropStyle };
             }
         }).mount('#app');
     </script>
