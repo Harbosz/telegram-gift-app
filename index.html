@@ -42,6 +42,8 @@
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             border: 1px solid rgba(0,0,0,0.03);
+            background-size: cover;
+            background-position: center;
         }
 
         .slot-empty {
@@ -138,10 +140,10 @@
                      @click="openPicker(index)"
                      class="slot-card"
                      :class="{'slot-empty': !slot.model}"
-                     :style="slot.backdrop ? { backgroundImage: `url(${slot.backdrop})`, backgroundSize: 'cover' } : {}">
+                     :style="slot.backdrop ? { backgroundImage: `url(${slot.backdrop})` } : {}">
                     
                     <div v-if="slot.model" class="w-full h-full flex items-center justify-center p-2 relative">
-                        <img :src="slot.model.image_url" class="w-full h-full object-contain drop-shadow-xl">
+                        <img :src="slot.model.image_url" class="w-full h-full object-contain drop-shadow-xl z-10">
                     </div>
                     <div v-else class="opacity-10">
                         <i class="fa-solid fa-plus text-xl"></i>
@@ -215,7 +217,7 @@
                     <label class="text-[10px] font-black uppercase tracking-widest opacity-40 ml-1 mb-2 block">Background</label>
                     <select v-model="tempSelection.backdrop" :disabled="!tempSelection.baseGift" class="select-custom">
                         <option :value="null">{{ tempSelection.baseGift ? 'None / Standard' : 'Lock: Select base first' }}</option>
-                        <option v-for="b in backdrops" :key="b" :value="b">{{ b.split('/').pop().split('.')[0] }}</option>
+                        <option v-for="b in commonBackdrops" :key="b" :value="b">{{ b.split('/').pop().split('.')[0] }}</option>
                     </select>
                 </div>
             </div>
@@ -237,15 +239,19 @@
                 const activeTab = ref('constructor');
                 const user = ref(tg.initDataUnsafe?.user || { first_name: 'Guest', photo_url: '' });
                 const gifts = ref([]);
+                const commonBackdrops = ref([]);
                 const slots = ref(Array(12).fill().map(() => ({ model: null, backdrop: null })));
                 const pickerOpen = ref(false);
                 const activeSlotIndex = ref(null);
-                const backdrops = ref([]);
                 const tempSelection = ref({ baseGift: '', model: null, backdrop: null });
 
                 const loadData = async () => {
-                    const res = await fetch('gifts.json');
-                    gifts.value = await res.json();
+                    const [resGifts, resBackdrops] = await Promise.all([
+                        fetch('gifts.json'),
+                        fetch('backdrops.json').catch(() => null)
+                    ]);
+                    gifts.value = await resGifts.json();
+                    if (resBackdrops) commonBackdrops.value = await resBackdrops.json();
                 };
 
                 const uniqueGifts = computed(() => [...new Set(gifts.value.map(g => g.name.split(':')[0].trim()))]);
@@ -259,24 +265,12 @@
                         model: current.model,
                         backdrop: current.backdrop
                     };
-                    if (tempSelection.value.baseGift) fetchBackdrops(tempSelection.value.baseGift);
                     pickerOpen.value = true;
                 };
 
                 const onGiftChange = () => {
                     tempSelection.value.model = null;
                     tempSelection.value.backdrop = null;
-                    fetchBackdrops(tempSelection.value.baseGift);
-                };
-
-                const fetchBackdrops = async (giftName) => {
-                    try {
-                        const res = await fetch(`https://api.changes.tg/backdrops/${encodeURIComponent(giftName)}`);
-                        if (res.ok) {
-                            const names = await res.json();
-                            backdrops.value = names.map(n => `https://api.changes.tg/backdrop/${encodeURIComponent(giftName)}/${encodeURIComponent(n)}.png`);
-                        }
-                    } catch (e) { console.error(e); }
                 };
 
                 const saveSelection = () => {
@@ -298,7 +292,7 @@
                     tg.setHeaderColor(tg.themeParams.secondary_bg_color || '#f0f0f2');
                 });
 
-                return { activeTab, user, slots, addRow, removeRow, pickerOpen, tempSelection, uniqueGifts, filteredModels, backdrops, openPicker, onGiftChange, saveSelection, resetSlot };
+                return { activeTab, user, slots, addRow, removeRow, pickerOpen, tempSelection, uniqueGifts, filteredModels, commonBackdrops, openPicker, onGiftChange, saveSelection, resetSlot };
             }
         }).mount('#app');
     </script>
