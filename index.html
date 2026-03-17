@@ -214,10 +214,13 @@
                 </div>
 
                 <div>
-                    <label class="text-[10px] font-black uppercase tracking-widest opacity-40 ml-1 mb-2 block">Background</label>
+                    <label class="text-[10px] font-black uppercase tracking-widest opacity-40 ml-1 mb-2 block text-flex justify-between">
+                        <span>Background</span>
+                        <span v-if="commonBackdrops.length" class="text-blue-500 lowercase opacity-100">({{ commonBackdrops.length }} items)</span>
+                    </label>
                     <select v-model="tempSelection.backdrop" :disabled="!tempSelection.baseGift" class="select-custom">
                         <option :value="null">{{ tempSelection.baseGift ? 'None / Standard' : 'Lock: Select base first' }}</option>
-                        <option v-for="b in commonBackdrops" :key="b" :value="b">{{ b.split('/').pop().split('.')[0] }}</option>
+                        <option v-for="b in commonBackdrops" :key="b" :value="b">{{ getBgName(b) }}</option>
                     </select>
                 </div>
             </div>
@@ -246,12 +249,20 @@
                 const tempSelection = ref({ baseGift: '', model: null, backdrop: null });
 
                 const loadData = async () => {
-                    const [resGifts, resBackdrops] = await Promise.all([
-                        fetch('gifts.json'),
-                        fetch('backdrops.json').catch(() => null)
-                    ]);
-                    gifts.value = await resGifts.json();
-                    if (resBackdrops) commonBackdrops.value = await resBackdrops.json();
+                    try {
+                        const resGifts = await fetch('gifts.json?' + Date.now());
+                        gifts.value = await resGifts.json();
+                        
+                        const resBackdrops = await fetch('backdrops.json?' + Date.now());
+                        if (resBackdrops.ok) {
+                            commonBackdrops.value = await resBackdrops.json();
+                            console.log("Backdrops loaded:", commonBackdrops.value.length);
+                        } else {
+                            console.error("Backdrops file not found or error");
+                        }
+                    } catch (e) {
+                        console.error("Critical load error", e);
+                    }
                 };
 
                 const uniqueGifts = computed(() => [...new Set(gifts.value.map(g => g.name.split(':')[0].trim()))]);
@@ -282,6 +293,14 @@
                     tempSelection.value = { baseGift: '', model: null, backdrop: null };
                 };
 
+                const getBgName = (url) => {
+                    try {
+                        const parts = url.split('/');
+                        const fileName = parts[parts.length - 1];
+                        return decodeURIComponent(fileName.replace('.png', ''));
+                    } catch (e) { return 'Background'; }
+                };
+
                 const addRow = () => slots.value.push(...Array(3).fill().map(() => ({ model: null, backdrop: null })));
                 const removeRow = () => { if (slots.value.length > 3) slots.value.splice(-3); };
 
@@ -292,7 +311,7 @@
                     tg.setHeaderColor(tg.themeParams.secondary_bg_color || '#f0f0f2');
                 });
 
-                return { activeTab, user, slots, addRow, removeRow, pickerOpen, tempSelection, uniqueGifts, filteredModels, commonBackdrops, openPicker, onGiftChange, saveSelection, resetSlot };
+                return { activeTab, user, slots, addRow, removeRow, pickerOpen, tempSelection, uniqueGifts, filteredModels, commonBackdrops, openPicker, onGiftChange, saveSelection, resetSlot, getBgName };
             }
         }).mount('#app');
     </script>
