@@ -42,8 +42,9 @@
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             border: 1px solid rgba(0,0,0,0.03);
-            background-size: cover;
-            background-position: center;
+            background-size: cover !important;
+            background-position: center !important;
+            background-repeat: no-repeat !important;
         }
 
         .slot-empty {
@@ -53,16 +54,6 @@
         }
 
         .slot-card:active { transform: scale(0.95); opacity: 0.8; }
-
-        .btn-premium {
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-        }
-
-        .btn-premium:active { transform: scale(0.96); }
 
         .select-custom {
             background: var(--sec-bg-color);
@@ -96,10 +87,6 @@
             background: var(--accent-color);
             border-radius: 50%;
         }
-
-        /* Dark mode adjustments */
-        .dark .slot-empty { border-color: rgba(255,255,255,0.1); }
-        .dark .glass { background: rgba(30, 30, 30, 0.8); }
     </style>
 </head>
 <body class="pb-28">
@@ -125,8 +112,8 @@
         <main v-if="activeTab === 'constructor'" class="px-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div class="flex items-end justify-between mb-8">
                 <div>
-                    <h2 class="text-3xl font-black italic tracking-tighter">BUILDER</h2>
-                    <p class="text-xs opacity-50 font-medium">Create your unique masterpiece</p>
+                    <h2 class="text-3xl font-black italic tracking-tighter uppercase">Builder</h2>
+                    <p class="text-xs opacity-50 font-medium">Create your collection</p>
                 </div>
                 <div class="flex gap-2">
                     <button @click="removeRow" class="w-10 h-10 bg-white dark:bg-zinc-800 rounded-xl shadow-sm flex items-center justify-center text-red-500 active:scale-90 transition-all"><i class="fa-solid fa-minus"></i></button>
@@ -152,23 +139,23 @@
             </div>
         </main>
 
-        <!-- COLLECTIONS TAB -->
+        <!-- VAULT TAB -->
         <main v-if="activeTab === 'collections'" class="px-6 py-20 text-center flex flex-col items-center">
             <div class="w-20 h-20 bg-zinc-100 dark:bg-zinc-800 rounded-[30px] flex items-center justify-center mb-6">
-                <i class="fa-solid fa-crown text-3xl opacity-20"></i>
+                <i class="fa-solid fa-gem text-3xl opacity-20"></i>
             </div>
             <h2 class="text-xl font-black italic uppercase">Vault</h2>
-            <p class="text-sm opacity-40 max-w-[200px] mt-2">Your saved collections will appear here shortly</p>
+            <p class="text-sm opacity-40 max-w-[200px] mt-2 italic">Stored masterpieces will appear here</p>
         </main>
 
         <!-- NAVIGATION -->
         <nav class="glass fixed bottom-6 left-6 right-6 h-20 rounded-[30px] flex justify-around items-center px-8 z-50 shadow-2xl border border-white/20">
             <div @click="activeTab = 'constructor'" :class="['nav-tab flex flex-col items-center gap-1', activeTab === 'constructor' ? 'active' : 'opacity-40']">
-                <i class="fa-solid fa-wand-magic-sparkles text-xl"></i>
+                <i class="fa-solid fa-square-plus text-xl"></i>
                 <span class="text-[9px] font-bold uppercase tracking-widest">Builder</span>
             </div>
             <div @click="activeTab = 'collections'" :class="['nav-tab flex flex-col items-center gap-1', activeTab === 'collections' ? 'active' : 'opacity-40']">
-                <i class="fa-solid fa-gem text-xl"></i>
+                <i class="fa-solid fa-box-archive text-xl"></i>
                 <span class="text-[9px] font-bold uppercase tracking-widest">Vault</span>
             </div>
         </nav>
@@ -178,57 +165,52 @@
         <div :class="['fixed bottom-0 left-0 right-0 bg-white dark:bg-zinc-900 rounded-t-[40px] z-[70] p-8 bottom-sheet max-h-[95vh] overflow-y-auto', pickerOpen ? 'open' : '']">
             <div class="w-16 h-1.5 bg-zinc-200 dark:bg-zinc-700 rounded-full mx-auto mb-10"></div>
             
-            <div class="flex items-center justify-between mb-8">
-                <h3 class="text-2xl font-black italic uppercase tracking-tighter">Settings</h3>
-                <div v-if="tempSelection.model" class="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-[10px] font-black">
-                    {{ (tempSelection.model.rarity / 10).toFixed(1) }}% RARE
-                </div>
-            </div>
+            <h3 class="text-2xl font-black italic uppercase tracking-tighter mb-8 text-center">Customize Slot</h3>
 
-            <!-- BIG PREVIEW -->
+            <!-- PREVIEW -->
             <div class="flex justify-center mb-10">
-                <div class="w-48 h-48 rounded-[40px] bg-zinc-50 dark:bg-zinc-800 shadow-inner flex items-center justify-center relative overflow-hidden border border-black/5"
+                <div class="w-48 h-48 rounded-[40px] shadow-inner flex items-center justify-center relative overflow-hidden border border-black/5 bg-zinc-50 dark:bg-zinc-800"
                      :style="tempSelection.backdrop ? { backgroundImage: `url(${tempSelection.backdrop})`, backgroundSize: 'cover' } : {}">
                     <img v-if="tempSelection.model" :src="tempSelection.model.image_url" class="w-32 h-32 object-contain drop-shadow-2xl z-10 scale-110">
-                    <div v-else class="text-zinc-300 dark:text-zinc-600 text-4xl">
-                        <i class="fa-solid fa-cube animate-pulse"></i>
-                    </div>
+                    <div v-else class="opacity-20 text-4xl"><i class="fa-solid fa-cube animate-pulse"></i></div>
                 </div>
             </div>
 
             <div class="space-y-6">
+                <!-- GIFT -->
                 <div>
-                    <label class="text-[10px] font-black uppercase tracking-widest opacity-40 ml-1 mb-2 block">Base Gift</label>
+                    <label class="text-[10px] font-black uppercase tracking-widest opacity-40 ml-1 mb-2 block">Gift Type</label>
                     <select v-model="tempSelection.baseGift" @change="onGiftChange" class="select-custom">
-                        <option value="" disabled>Select Gift...</option>
+                        <option value="" disabled>Select Gift</option>
                         <option v-for="name in uniqueGifts" :key="name" :value="name">{{ name }}</option>
                     </select>
                 </div>
 
+                <!-- MODEL -->
                 <div>
-                    <label class="text-[10px] font-black uppercase tracking-widest opacity-40 ml-1 mb-2 block">Model Variation</label>
+                    <label class="text-[10px] font-black uppercase tracking-widest opacity-40 ml-1 mb-2 block">Model Style</label>
                     <select v-model="tempSelection.model" :disabled="!tempSelection.baseGift" class="select-custom">
-                        <option :value="null">{{ tempSelection.baseGift ? 'Choose Style...' : 'Lock: Select base first' }}</option>
-                        <option v-for="m in filteredModels" :key="m.id" :value="m">{{ m.name.split(':')[1] }}</option>
+                        <option :value="null">{{ tempSelection.baseGift ? 'Choose Variation' : '🔒 Choose gift first' }}</option>
+                        <option v-for="m in filteredModels" :key="m.id" :value="m">{{ m.name.split(':')[1] }} ({{ m.rarity/10 }}%)</option>
                     </select>
                 </div>
 
+                <!-- BACKGROUND -->
                 <div>
-                    <label class="text-[10px] font-black uppercase tracking-widest opacity-40 ml-1 mb-2 block text-flex justify-between">
-                        <span>Background</span>
-                        <span v-if="commonBackdrops.length" class="text-blue-500 lowercase opacity-100">({{ commonBackdrops.length }} items)</span>
+                    <label class="text-[10px] font-black uppercase tracking-widest opacity-40 ml-1 mb-2 block flex justify-between">
+                        <span>Backdrop</span>
+                        <span class="text-blue-500 lowercase" v-if="commonBackdrops.length">({{ commonBackdrops.length }} items)</span>
                     </label>
                     <select v-model="tempSelection.backdrop" :disabled="!tempSelection.baseGift" class="select-custom">
-                        <option :value="null">{{ tempSelection.baseGift ? 'None / Standard' : 'Lock: Select base first' }}</option>
+                        <option :value="null">{{ tempSelection.baseGift ? 'None / Default' : '🔒 Choose gift first' }}</option>
                         <option v-for="b in commonBackdrops" :key="b" :value="b">{{ getBgName(b) }}</option>
                     </select>
                 </div>
             </div>
 
-            <!-- ACTIONS -->
             <div class="flex gap-4 mt-12">
-                <button @click="resetSlot" class="flex-1 py-5 bg-zinc-100 dark:bg-zinc-800 text-zinc-400 rounded-3xl font-black uppercase tracking-widest text-[10px] btn-premium">Reset</button>
-                <button @click="saveSelection" class="flex-[2] py-5 bg-blue-500 text-white rounded-3xl font-black uppercase tracking-widest text-[10px] shadow-xl shadow-blue-500/40 btn-premium">Apply Changes</button>
+                <button @click="resetSlot" class="flex-1 py-5 bg-zinc-100 dark:bg-zinc-800 text-zinc-400 rounded-3xl font-black uppercase tracking-widest text-[10px]">Reset</button>
+                <button @click="saveSelection" class="flex-[2] py-5 bg-blue-500 text-white rounded-3xl font-black uppercase tracking-widest text-[10px] shadow-xl shadow-blue-500/40">Apply</button>
             </div>
         </div>
     </div>
@@ -240,7 +222,7 @@
         createApp({
             setup() {
                 const activeTab = ref('constructor');
-                const user = ref(tg.initDataUnsafe?.user || { first_name: 'Guest', photo_url: '' });
+                const user = ref(tg.initDataUnsafe?.user || { first_name: 'Guest' });
                 const gifts = ref([]);
                 const commonBackdrops = ref([]);
                 const slots = ref(Array(12).fill().map(() => ({ model: null, backdrop: null })));
@@ -250,19 +232,14 @@
 
                 const loadData = async () => {
                     try {
-                        const resGifts = await fetch('gifts.json?' + Date.now());
-                        gifts.value = await resGifts.json();
-                        
-                        const resBackdrops = await fetch('backdrops.json?' + Date.now());
-                        if (resBackdrops.ok) {
-                            commonBackdrops.value = await resBackdrops.json();
-                            console.log("Backdrops loaded:", commonBackdrops.value.length);
-                        } else {
-                            console.error("Backdrops file not found or error");
-                        }
-                    } catch (e) {
-                        console.error("Critical load error", e);
-                    }
+                        const ts = Date.now();
+                        const [gRes, bRes] = await Promise.all([
+                            fetch(`gifts.json?v=${ts}`),
+                            fetch(`backdrops.json?v=${ts}`).catch(() => null)
+                        ]);
+                        gifts.value = await gRes.json();
+                        if (bRes && bRes.ok) commonBackdrops.value = await bRes.json();
+                    } catch (e) { console.error("Load error:", e); }
                 };
 
                 const uniqueGifts = computed(() => [...new Set(gifts.value.map(g => g.name.split(':')[0].trim()))]);
@@ -270,18 +247,13 @@
 
                 const openPicker = (index) => {
                     activeSlotIndex.value = index;
-                    const current = slots.value[index];
+                    const cur = slots.value[index];
                     tempSelection.value = {
-                        baseGift: current.model ? current.model.name.split(':')[0].trim() : '',
-                        model: current.model,
-                        backdrop: current.backdrop
+                        baseGift: cur.model ? cur.model.name.split(':')[0].trim() : '',
+                        model: cur.model,
+                        backdrop: cur.backdrop
                     };
                     pickerOpen.value = true;
-                };
-
-                const onGiftChange = () => {
-                    tempSelection.value.model = null;
-                    tempSelection.value.backdrop = null;
                 };
 
                 const saveSelection = () => {
@@ -293,20 +265,24 @@
                     tempSelection.value = { baseGift: '', model: null, backdrop: null };
                 };
 
+                const onGiftChange = () => {
+                    tempSelection.value.model = null;
+                    tempSelection.value.backdrop = null;
+                };
+
                 const getBgName = (url) => {
                     try {
-                        const parts = url.split('/');
-                        const fileName = parts[parts.length - 1];
-                        return decodeURIComponent(fileName.replace('.png', ''));
-                    } catch (e) { return 'Background'; }
+                        const file = url.split('/').pop();
+                        return decodeURIComponent(file.replace('.png', ''));
+                    } catch (e) { return 'Backdrop'; }
                 };
 
                 const addRow = () => slots.value.push(...Array(3).fill().map(() => ({ model: null, backdrop: null })));
                 const removeRow = () => { if (slots.value.length > 3) slots.value.splice(-3); };
 
-                onMounted(() => { 
-                    loadData(); 
-                    tg.ready(); 
+                onMounted(() => {
+                    loadData();
+                    tg.ready();
                     tg.expand();
                     tg.setHeaderColor(tg.themeParams.secondary_bg_color || '#f0f0f2');
                 });
