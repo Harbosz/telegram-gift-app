@@ -2,108 +2,212 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telegram Gift Collections</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gift Constructor</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body {
             background-color: var(--tg-theme-secondary-bg-color, #f4f4f7);
             color: var(--tg-theme-text-color, #222);
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overflow-x: hidden;
         }
-        .card {
+        .glass {
             background: var(--tg-theme-bg-color, #fff);
+            backdrop-filter: blur(10px);
+        }
+        .slot-card {
+            aspect-ratio: 1/1;
+            background: var(--tg-theme-bg-color, #fff);
+            border: 2px dashed var(--tg-theme-hint-color, #ccc);
             border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
         }
-        .glass-header {
-            background: var(--tg-theme-bg-color, #fff);
-            position: sticky;
-            top: 0;
-            z-index: 50;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
+        .slot-filled {
+            border: none;
+            background-size: cover;
+            background-position: center;
+        }
+        .nav-btn {
+            color: var(--tg-theme-hint-color, #999);
+        }
+        .nav-btn.active {
+            color: var(--tg-theme-button-color, #2481cc);
+        }
+        .bottom-sheet {
+            transition: transform 0.3s ease-out;
+            transform: translateY(100%);
+        }
+        .bottom-sheet.open {
+            transform: translateY(0);
         }
     </style>
 </head>
-<body class="p-4 pt-0">
+<body class="pb-24">
     <div id="app">
-        <div class="glass-header py-4 mb-4">
-            <h1 class="text-xl font-bold mb-4">💎 Gift Explorer</h1>
-            <input 
-                type="text" 
-                v-model="query" 
-                @input="search"
-                placeholder="Поиск: золото, зеленый, эльф..." 
-                class="w-full p-3 rounded-xl border-none ring-2 ring-blue-500/10 focus:ring-blue-500 bg-zinc-100 dark:bg-zinc-800 outline-none"
-            >
-            <p class="text-[10px] mt-2 text-zinc-400">Всего моделей в базе: {{ allGifts.length }}</p>
-        </div>
-
-        <div v-if="loading" class="flex justify-center py-10">
-            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-        </div>
-
-        <div v-else class="grid grid-cols-2 gap-4">
-            <div v-for="gift in displayedGifts" :key="gift.id" class="card overflow-hidden flex flex-col">
-                <div class="relative pt-[100%] bg-zinc-50 dark:bg-zinc-900">
-                    <img :src="gift.image_url" class="absolute inset-0 w-full h-full object-contain p-2" loading="lazy">
+        <!-- HEADER -->
+        <header class="glass p-4 sticky top-0 z-40 flex justify-between items-center border-b border-black/5">
+            <div class="flex items-center gap-3">
+                <img :src="user.photo_url || 'https://via.placeholder.com/40'" class="w-10 h-10 rounded-full border-2 border-blue-500">
+                <div>
+                    <h1 class="text-sm font-bold">{{ user.first_name || 'Collector' }}</h1>
+                    <p class="text-[10px] opacity-60">My Collection</p>
                 </div>
-                <div class="p-3">
-                    <h3 class="font-bold text-[10px] leading-tight h-8 overflow-hidden">{{ gift.name }}</h3>
-                    <div class="flex justify-between items-center mt-2">
-                        <span class="text-[9px] px-1.5 py-0.5 bg-blue-100 text-blue-600 rounded">{{ gift.rarity/10 }}%</span>
+            </div>
+            <div class="flex gap-4 text-lg">
+                <i class="fa-solid fa-gear opacity-60"></i>
+                <i @click="toggleTheme" class="fa-solid fa-circle-half-stroke text-blue-500"></i>
+            </div>
+        </header>
+
+        <!-- MAIN PANEL: CONSTRUCTOR -->
+        <main v-if="activeTab === 'constructor'" class="p-4 animate-in fade-in duration-300">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="font-bold text-lg">Конструктор</h2>
+                <div class="flex gap-2">
+                    <button @click="removeRow" class="px-3 py-1 bg-red-100 text-red-600 rounded-lg text-xs font-bold">- Ряд</button>
+                    <button @click="addRow" class="px-3 py-1 bg-green-100 text-green-600 rounded-lg text-xs font-bold">+ Ряд</button>
+                </div>
+            </div>
+
+            <!-- GRID -->
+            <div class="grid grid-cols-3 gap-3">
+                <div v-for="(slot, index) in slots" :key="index" 
+                     @click="openPicker(index)"
+                     class="slot-card"
+                     :class="{'slot-filled': slot.model}"
+                     :style="slot.backdrop ? { backgroundImage: `url(${slot.backdrop})` } : {}">
+                    
+                    <img v-if="slot.model" :src="slot.model.image_url" class="w-full h-full object-contain p-1 z-10">
+                    <i v-else class="fa-solid fa-plus text-2xl opacity-20"></i>
+                    
+                    <div v-if="slot.model" @click.stop="clearSlot(index)" class="absolute top-1 right-1 bg-black/20 rounded-full p-1 leading-none text-[8px] text-white">
+                        <i class="fa-solid fa-xmark"></i>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- PANEL: COLLECTIONS (Placeholder) -->
+        <main v-if="activeTab === 'collections'" class="p-4 text-center py-20">
+            <i class="fa-solid fa-layer-group text-5xl opacity-20 mb-4"></i>
+            <h2 class="font-bold text-xl">Мои коллекции</h2>
+            <p class="text-zinc-500 text-sm mt-2">Здесь будут храниться ваши готовые наборы. Скоро!</p>
+        </main>
+
+        <!-- NAVIGATION -->
+        <nav class="glass fixed bottom-0 left-0 right-0 h-20 flex justify-around items-center border-t border-black/5 px-6 z-50">
+            <div @click="activeTab = 'constructor'" :class="['nav-btn flex flex-col items-center gap-1', activeTab === 'constructor' ? 'active' : '']">
+                <i class="fa-solid fa-wand-magic-sparkles text-xl"></i>
+                <span class="text-[10px] font-medium">Создать</span>
+            </div>
+            <div @click="activeTab = 'collections'" :class="['nav-btn flex flex-col items-center gap-1', activeTab === 'collections' ? 'active' : '']">
+                <i class="fa-solid fa-box-archive text-xl"></i>
+                <span class="text-[10px] font-medium">Коллекции</span>
+            </div>
+        </nav>
+
+        <!-- SELECTION PICKER (Bottom Sheet) -->
+        <div class="fixed inset-0 bg-black/40 z-[60]" v-if="pickerOpen" @click="pickerOpen = false"></div>
+        <div :class="['fixed bottom-0 left-0 right-0 glass rounded-t-3xl z-[70] p-6 bottom-sheet max-h-[85vh] overflow-y-auto', pickerOpen ? 'open' : '']">
+            <div class="w-12 h-1.5 bg-zinc-300 rounded-full mx-auto mb-6"></div>
+            
+            <!-- Step 1: Select Base Gift -->
+            <div v-if="pickStep === 'gift'">
+                <h3 class="font-bold text-lg mb-4">Выберите подарок</h3>
+                <div class="grid grid-cols-2 gap-3">
+                    <div v-for="giftName in uniqueGifts" :key="giftName" 
+                         @click="selectGift(giftName)"
+                         class="p-4 border rounded-xl bg-zinc-50 active:scale-95 transition-transform text-center font-bold text-xs uppercase tracking-wider">
+                        {{ giftName }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Select Model -->
+            <div v-if="pickStep === 'model'">
+                <div class="flex items-center gap-3 mb-6">
+                    <i @click="pickStep = 'gift'" class="fa-solid fa-arrow-left text-lg"></i>
+                    <h3 class="font-bold text-lg">Модели для {{ selectedBaseGift }}</h3>
+                </div>
+                <div class="grid grid-cols-3 gap-3">
+                    <div v-for="model in filteredModels" :key="model.id" 
+                         @click="selectModel(model)"
+                         class="aspect-square bg-zinc-100 rounded-xl p-2 relative">
+                        <img :src="model.image_url" class="w-full h-full object-contain">
+                        <div class="absolute bottom-1 right-1 bg-blue-500 text-[8px] text-white px-1 rounded">{{ model.rarity/10 }}%</div>
                     </div>
                 </div>
             </div>
         </div>
-
-        <div v-if="!loading && displayedGifts.length === 0" class="text-center py-20 text-zinc-400">
-            Ничего не нашли 😕
-        </div>
     </div>
 
     <script>
-        const { createApp, ref, onMounted } = Vue;
+        const { createApp, ref, computed, onMounted } = Vue;
         const tg = window.Telegram.WebApp;
 
         createApp({
             setup() {
-                const query = ref('');
-                const allGifts = ref([]);
-                const displayedGifts = ref([]);
-                const loading = ref(true);
-                let fuse = null;
+                const activeTab = ref('constructor');
+                const user = ref(tg.initDataUnsafe?.user || { first_name: 'User', photo_url: '' });
+                const gifts = ref([]);
+                const slots = ref(Array(12).fill().map(() => ({ model: null, backdrop: null })));
+                
+                // Picker state
+                const pickerOpen = ref(false);
+                const pickStep = ref('gift'); // 'gift' or 'model'
+                const activeSlotIndex = ref(null);
+                const selectedBaseGift = ref(null);
 
                 const loadData = async () => {
-                    try {
-                        // Загружаем JSON файл напрямую
-                        const res = await fetch('gifts.json');
-                        allGifts.value = await res.json();
-                        
-                        // Инициализируем поиск Fuse.js
-                        fuse = new Fuse(allGifts.value, {
-                            keys: ['name', 'description'],
-                            threshold: 0.3, // Чувствительность поиска
-                        });
-
-                        displayedGifts.value = allGifts.value.slice(0, 30); // Показываем первые 30
-                    } catch (e) {
-                        console.error("Ошибка загрузки данных", e);
-                    } finally {
-                        loading.value = false;
-                    }
+                    const res = await fetch('gifts.json');
+                    gifts.value = await res.json();
                 };
 
-                const search = () => {
-                    if (!query.value) {
-                        displayedGifts.value = allGifts.value.slice(0, 30);
-                        return;
-                    }
-                    const results = fuse.search(query.value);
-                    displayedGifts.value = results.map(r => r.item).slice(0, 40);
+                const uniqueGifts = computed(() => {
+                    const names = gifts.value.map(g => g.name.split(':')[0].trim());
+                    return [...new Set(names)];
+                });
+
+                const filteredModels = computed(() => {
+                    if (!selectedBaseGift.value) return [];
+                    return gifts.value.filter(g => g.name.startsWith(selectedBaseGift.value));
+                });
+
+                const addRow = () => { if (slots.value.length < 24) slots.value.push(...Array(3).fill().map(() => ({ model: null, backdrop: null }))); };
+                const removeRow = () => { if (slots.value.length > 3) slots.value.splice(-3); };
+
+                const openPicker = (index) => {
+                    activeSlotIndex.value = index;
+                    pickStep.value = 'gift';
+                    pickerOpen.value = true;
+                };
+
+                const selectGift = (giftName) => {
+                    selectedBaseGift.value = giftName;
+                    pickStep.value = 'model';
+                };
+
+                const selectModel = (model) => {
+                    slots.value[activeSlotIndex.value].model = model;
+                    pickerOpen.value = false;
+                };
+
+                const clearSlot = (index) => {
+                    slots.value[index].model = null;
+                    slots.value[index].backdrop = null;
+                };
+
+                const toggleTheme = () => {
+                    document.body.classList.toggle('dark');
+                    // В TMA тема меняется автоматически, но здесь мы можем добавить кастомный переключатель
                 };
 
                 onMounted(() => {
@@ -112,7 +216,12 @@
                     tg.expand();
                 });
 
-                return { query, allGifts, displayedGifts, loading, search };
+                return { 
+                    activeTab, user, slots, addRow, removeRow, 
+                    pickerOpen, pickStep, openPicker, uniqueGifts, 
+                    selectGift, selectedBaseGift, filteredModels, selectModel,
+                    clearSlot, toggleTheme
+                };
             }
         }).mount('#app');
     </script>
