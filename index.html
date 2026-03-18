@@ -3,138 +3,245 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gift Designer Premium</title>
+    <title>Gift Designer Elite</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
-            --accent-color: #007aff;
-            --bg-color: var(--tg-theme-bg-color, #ffffff);
-            --sec-bg-color: var(--tg-theme-secondary-bg-color, #f0f0f2);
-            --text-color: var(--tg-theme-text-color, #000000);
+            --accent: #007aff;
+            --bg: var(--tg-theme-bg-color, #ffffff);
+            --sec-bg: var(--tg-theme-secondary-bg-color, #f4f4f7);
+            --text: var(--tg-theme-text-color, #000000);
         }
+
         body {
-            background-color: var(--sec-bg-color);
-            color: var(--text-color);
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--sec-bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
             overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
         }
+
+        /* Glass Effects */
+        .glass-card {
+            background: rgba(var(--tg-theme-bg-color-rgb, 255, 255, 255), 0.8);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
         .slot-card {
             aspect-ratio: 1/1;
-            background: var(--bg-color);
-            border-radius: 24px;
-            overflow: hidden;
+            border-radius: 28px;
             position: relative;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            overflow: hidden;
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.1);
         }
+
+        .slot-card:active { transform: scale(0.92); }
+
+        .slot-empty {
+            background: var(--bg);
+            border: 2px dashed rgba(0,0,0,0.05);
+            box-shadow: none;
+        }
+
         .premium-bg {
             position: absolute;
             inset: 0;
             z-index: 1;
+            transition: background 0.5s ease;
         }
+
         .layer-gift {
             position: absolute;
             inset: 0;
             object-fit: contain;
             padding: 12%;
             z-index: 2;
+            filter: drop-shadow(0 15px 25px rgba(0,0,0,0.2));
+            animation: floating 3s ease-in-out infinite;
         }
+
+        @keyframes floating {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
         .bottom-sheet {
-            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
             transform: translateY(100%);
+            border-radius: 45px 48px 0 0;
         }
         .bottom-sheet.open { transform: translateY(0); }
-        .select-custom {
-            width: 100%;
-            padding: 16px;
-            background: var(--sec-bg-color);
-            border-radius: 16px;
-            appearance: none;
-            outline: none;
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 0; background: transparent; }
+
+        .btn-action {
+            transition: all 0.2s;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+        .btn-action:active { transform: scale(0.96); opacity: 0.9; }
+
+        /* Fancy Select Replacement */
+        .chip-select {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 4px;
+            margin: 0 -32px;
+            padding-left: 32px;
+            padding-right: 32px;
+        }
+        .chip {
+            white-space: nowrap;
+            padding: 12px 20px;
+            border-radius: 18px;
+            background: var(--sec-bg);
+            font-size: 13px;
+            font-weight: 600;
+            border: 1px solid rgba(0,0,0,0.03);
+            transition: all 0.2s;
+        }
+        .chip.active {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 8px 20px -5px rgba(0,122,255,0.4);
         }
     </style>
 </head>
-<body class="pb-32">
+<body class="pb-36">
     <div id="app">
-        <!-- ERROR OVERLAY (Debug Mode) -->
-        <div v-if="error" class="fixed inset-0 z-[100] bg-red-500 text-white p-10 overflow-auto">
-            <h1 class="text-2xl font-bold mb-4">Oops! Data Load Error</h1>
-            <p class="font-mono text-sm">{{ error }}</p>
-            <button @click="location.reload()" class="mt-10 px-6 py-3 bg-white text-red-500 rounded-xl font-bold">Try Reload</button>
-        </div>
-
-        <div v-if="loading && !error" class="fixed inset-0 flex items-center justify-center bg-zinc-50 z-50">
-            <div class="flex flex-col items-center">
-                <div class="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                <p class="mt-4 font-bold opacity-30 uppercase tracking-widest text-xs">Loading Data...</p>
-            </div>
-        </div>
-
         <!-- APP CONTENT -->
-        <div v-if="!loading && !error">
-            <header class="p-6 flex justify-between items-center">
+        <div v-if="!loading" class="animate-in fade-in duration-700">
+            <!-- HEADER -->
+            <header class="p-8 flex justify-between items-center">
                 <div class="flex items-center gap-4">
-                    <img :src="user.photo_url || 'https://via.placeholder.com/100'" class="w-12 h-12 rounded-2xl border-2 border-white shadow-sm">
-                    <h1 class="text-lg font-black">{{ user.first_name }}</h1>
+                    <div class="relative">
+                        <img :src="user.photo_url || 'https://via.placeholder.com/100'" class="w-14 h-14 rounded-[22px] border-4 border-white shadow-xl">
+                        <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-4 border-white rounded-full"></div>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-black tracking-tight">{{ user.first_name }}</h1>
+                        <p class="text-[10px] uppercase font-black text-blue-500 tracking-[0.2em] opacity-80">Elite Architect</p>
+                    </div>
+                </div>
+                <div class="w-12 h-12 glass-card rounded-2xl flex items-center justify-center shadow-sm">
+                    <i class="fa-solid fa-bolt-lightning text-blue-500"></i>
                 </div>
             </header>
 
-            <main class="px-6 space-y-6">
-                <div class="flex items-center justify-between">
-                    <h2 class="text-3xl font-black italic uppercase italic">Builder</h2>
-                    <div class="flex gap-2">
-                        <button @click="removeRow" class="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-red-500"><i class="fa-solid fa-minus"></i></button>
-                        <button @click="addRow" class="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center text-white shadow-lg"><i class="fa-solid fa-plus"></i></button>
+            <!-- BUILDER SECTION -->
+            <main v-if="activeTab === 'constructor'" class="px-8 space-y-8">
+                <div class="flex items-end justify-between">
+                    <div>
+                        <h2 class="text-4xl font-black italic tracking-tighter uppercase leading-none">Studio</h2>
+                        <p class="text-[11px] opacity-40 font-bold mt-2 uppercase tracking-widest">Designing your legacy</p>
+                    </div>
+                    <div class="flex gap-3">
+                        <button @click="removeRow" class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-red-500 shadow-sm btn-action"><i class="fa-solid fa-minus"></i></button>
+                        <button @click="addRow" class="w-12 h-12 bg-blue-500 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-blue-500/30 btn-action"><i class="fa-solid fa-plus"></i></button>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-3 gap-4">
-                    <div v-for="(slot, index) in slots" :key="index" @click="openPicker(index)" class="slot-card" :style="getBgStyle(slot.backdrop)">
+                <!-- GRID -->
+                <div class="grid grid-cols-3 gap-5">
+                    <div v-for="(slot, index) in slots" :key="index" 
+                         @click="openPicker(index)"
+                         class="slot-card"
+                         :class="{'slot-empty': !slot.model}">
+                        
+                        <div v-if="slot.backdrop" class="premium-bg" :style="getBgStyle(slot.backdrop)"></div>
                         <img v-if="slot.model" :src="slot.model.image_url" class="layer-gift">
-                        <div v-if="!slot.model" class="flex items-center justify-center h-full opacity-10"><i class="fa-solid fa-plus"></i></div>
+                        
+                        <div v-if="!slot.model" class="flex items-center justify-center h-full opacity-5">
+                            <i class="fa-solid fa-plus text-2xl"></i>
+                        </div>
                     </div>
                 </div>
             </main>
 
-            <nav class="fixed bottom-6 left-6 right-6 h-20 rounded-[30px] flex justify-around items-center px-8 z-50 shadow-2xl border border-white/20 bg-white/80 backdrop-blur-xl">
-                <div @click="activeTab = 'constructor'" :class="['flex flex-col items-center gap-1', activeTab === 'constructor' ? 'text-blue-500' : 'opacity-30']">
-                    <i class="fa-solid fa-square-plus text-xl"></i>
-                    <span class="text-[9px] font-black uppercase">Builder</span>
+            <!-- VAULT SECTION -->
+            <main v-if="activeTab === 'collections'" class="p-12 text-center flex flex-col items-center animate-in zoom-in-95 duration-500">
+                <div class="w-24 h-24 bg-white rounded-[40px] flex items-center justify-center mb-6 shadow-2xl">
+                    <i class="fa-solid fa-chess-rook text-4xl text-blue-500/20"></i>
                 </div>
-                <div @click="activeTab = 'collections'" :class="['flex flex-col items-center gap-1', activeTab === 'collections' ? 'text-blue-500' : 'opacity-30']">
-                    <i class="fa-solid fa-box-archive text-xl"></i>
-                    <span class="text-[9px] font-black uppercase">Vault</span>
+                <h3 class="font-black italic uppercase text-lg tracking-widest opacity-20">The Vault</h3>
+                <p class="text-xs font-bold opacity-20 mt-2 uppercase tracking-tighter">Your collection is empty</p>
+            </main>
+
+            <!-- NAVIGATION -->
+            <nav class="fixed bottom-8 left-8 right-8 h-22 rounded-[40px] glass-card flex justify-around items-center px-10 z-50 shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-white/40">
+                <div @click="activeTab = 'constructor'" :class="['flex flex-col items-center gap-1.5 transition-all duration-300', activeTab === 'constructor' ? 'text-blue-500 scale-110' : 'opacity-20']">
+                    <i class="fa-solid fa-compass-drafting text-2xl"></i>
+                    <span class="text-[8px] font-black uppercase tracking-widest">Builder</span>
+                </div>
+                <div @click="activeTab = 'collections'" :class="['flex flex-col items-center gap-1.5 transition-all duration-300', activeTab === 'collections' ? 'text-blue-500 scale-110' : 'opacity-20']">
+                    <i class="fa-solid fa-boxes-stacked text-2xl"></i>
+                    <span class="text-[8px] font-black uppercase tracking-widest">Vault</span>
                 </div>
             </nav>
 
-            <!-- PICKER -->
-            <div class="fixed inset-0 bg-black/60 z-[60] backdrop-blur-sm" v-if="pickerOpen" @click="pickerOpen = false"></div>
-            <div :class="['fixed bottom-0 left-0 right-0 bg-white rounded-t-[40px] z-[70] p-8 bottom-sheet max-h-[90vh] overflow-y-auto', pickerOpen ? 'open' : '']">
-                <div class="w-16 h-1.5 bg-zinc-200 rounded-full mx-auto mb-8"></div>
-                <div class="flex justify-center mb-10">
-                    <div class="w-48 h-48 slot-card shadow-2xl" :style="getBgStyle(tempSelection.backdrop)">
+            <!-- PICKER SHEET -->
+            <div class="fixed inset-0 bg-black/40 z-[60] backdrop-blur-md transition-opacity duration-500" v-if="pickerOpen" @click="pickerOpen = false"></div>
+            <div :class="['fixed bottom-0 left-0 right-0 bg-white dark:bg-zinc-950 z-[70] p-10 bottom-sheet max-h-[92vh] overflow-y-auto shadow-2xl', pickerOpen ? 'open' : '']">
+                <div class="w-20 h-1.5 bg-zinc-100 rounded-full mx-auto mb-10 opacity-50"></div>
+                
+                <h3 class="text-3xl font-black italic uppercase tracking-tighter mb-10 text-center leading-none">Configure<br><span class="text-blue-500">Masterpiece</span></h3>
+
+                <!-- PREVIEW BOX -->
+                <div class="flex justify-center mb-12">
+                    <div class="w-64 h-64 slot-card shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)] border-[6px] border-white dark:border-zinc-800 scale-105">
+                        <div v-if="tempSelection.backdrop" class="premium-bg" :style="getBgStyle(tempSelection.backdrop)"></div>
                         <img v-if="tempSelection.model" :src="tempSelection.model.image_url" class="layer-gift scale-110">
+                        <div v-if="!tempSelection.model" class="flex items-center justify-center h-full opacity-10 text-5xl"><i class="fa-solid fa-fingerprint"></i></div>
                     </div>
                 </div>
-                <div class="space-y-6">
-                    <select v-model="tempSelection.baseGift" @change="onGiftChange" class="select-custom">
-                        <option value="" disabled>Select Gift</option>
-                        <option v-for="name in uniqueGifts" :key="name" :value="name">{{ name }}</option>
-                    </select>
-                    <select v-model="tempSelection.model" :disabled="!tempSelection.baseGift" class="select-custom">
-                        <option :value="null">Choose Model</option>
-                        <option v-for="m in filteredModels" :key="m.id" :value="m">{{ m.name.split(':')[1] }}</option>
-                    </select>
-                    <select v-model="tempSelection.backdrop" :disabled="!tempSelection.baseGift" class="select-custom">
-                        <option :value="null">Choose Backdrop</option>
-                        <option v-for="b in commonBackdrops" :key="b" :value="b">{{ b.name }}</option>
-                    </select>
+
+                <!-- CHIP SELECTORS -->
+                <div class="space-y-8">
+                    <div>
+                        <p class="text-[10px] font-black uppercase tracking-[0.2em] opacity-30 mb-4 ml-1">1. Base Structure</p>
+                        <div class="chip-select">
+                            <div v-for="name in uniqueGifts" :key="name" 
+                                 @click="selectBase(name)"
+                                 :class="['chip', tempSelection.baseGift === name ? 'active' : '']">
+                                {{ name }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div :class="{'opacity-20 pointer-events-none': !tempSelection.baseGift}">
+                        <p class="text-[10px] font-black uppercase tracking-[0.2em] opacity-30 mb-4 ml-1">2. Visual Style</p>
+                        <div class="chip-select">
+                            <div v-for="m in filteredModels" :key="m.id" 
+                                 @click="tempSelection.model = m"
+                                 :class="['chip', tempSelection.model?.id === m.id ? 'active' : '']">
+                                {{ m.name.split(':')[1] }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div :class="{'opacity-20 pointer-events-none': !tempSelection.baseGift}">
+                        <p class="text-[10px] font-black uppercase tracking-[0.2em] opacity-30 mb-4 ml-1">3. Environment</p>
+                        <div class="chip-select">
+                            <div v-for="b in commonBackdrops" :key="b.name" 
+                                 @click="tempSelection.backdrop = b"
+                                 :class="['chip', tempSelection.backdrop?.name === b.name ? 'active' : '']">
+                                {{ b.name }}
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="flex gap-4 mt-10">
-                    <button @click="resetSlot" class="flex-1 py-5 bg-zinc-100 rounded-3xl font-black uppercase text-[10px]">Reset</button>
-                    <button @click="saveSelection" class="flex-[2] py-5 bg-blue-500 text-white rounded-3xl font-black uppercase text-[10px]">Apply</button>
+
+                <div class="flex gap-5 mt-14">
+                    <button @click="resetSlot" class="flex-1 py-6 bg-zinc-50 dark:bg-zinc-900 text-zinc-400 rounded-3xl font-black uppercase tracking-widest text-[10px] btn-action">Reset</button>
+                    <button @click="saveSelection" class="flex-[2] py-6 bg-blue-500 text-white rounded-3xl font-black uppercase tracking-widest text-[10px] shadow-2xl shadow-blue-500/40 btn-action">Authorize</button>
                 </div>
             </div>
         </div>
@@ -144,9 +251,8 @@
         const { createApp, ref, computed, onMounted } = Vue;
         createApp({
             setup() {
-                const user = ref({ first_name: 'Guest' });
+                const user = ref({ first_name: 'Collector' });
                 const loading = ref(true);
-                const error = ref(null);
                 const gifts = ref([]);
                 const commonBackdrops = ref([]);
                 const activeTab = ref('constructor');
@@ -157,22 +263,15 @@
 
                 const loadData = async () => {
                     try {
-                        loading.value = true;
-                        const v = Date.now();
+                        const ts = Date.now();
                         const [gRes, bRes] = await Promise.all([
-                            fetch(`gifts.json?v=${v}`),
-                            fetch(`backdrops.json?v=${v}`)
+                            fetch(`gifts.json?v=${ts}`),
+                            fetch(`backdrops.json?v=${ts}`)
                         ]);
-                        if (!gRes.ok) throw new Error(`gifts.json status: ${gRes.status}`);
-                        if (!bRes.ok) throw new Error(`backdrops.json status: ${bRes.status}`);
-                        
                         gifts.value = await gRes.json();
                         commonBackdrops.value = await bRes.json();
                         loading.value = false;
-                    } catch (e) {
-                        error.value = e.message;
-                        loading.value = false;
-                    }
+                    } catch (e) { console.error(e); }
                 };
 
                 const uniqueGifts = computed(() => [...new Set(gifts.value.map(g => g.name.split(':')[0].trim()))]);
@@ -180,7 +279,7 @@
                 
                 const getBgStyle = (bg) => {
                     if (!bg || !bg.center) return {};
-                    return { background: `radial-gradient(circle at center, ${bg.center} 0%, ${bg.edge} 100%)` };
+                    return { background: `radial-gradient(circle at 50% 50%, ${bg.center} 0%, ${bg.edge} 100%)` };
                 };
 
                 const openPicker = (index) => {
@@ -194,22 +293,28 @@
                     pickerOpen.value = true;
                 };
 
+                const selectBase = (name) => {
+                    tempSelection.value.baseGift = name;
+                    tempSelection.value.model = null;
+                    tempSelection.value.backdrop = null;
+                };
+
                 const saveSelection = () => { slots.value[activeSlotIndex.value] = { ...tempSelection.value }; pickerOpen.value = false; };
-                const onGiftChange = () => { tempSelection.value.model = null; tempSelection.value.backdrop = null; };
                 const resetSlot = () => { tempSelection.value = { baseGift: '', model: null, backdrop: null }; };
                 const addRow = () => slots.value.push(...Array(3).fill().map(() => ({ model: null, backdrop: null })));
                 const removeRow = () => { if (slots.value.length > 3) slots.value.splice(-3); };
 
                 onMounted(() => {
                     if (window.Telegram?.WebApp) {
-                        window.Telegram.WebApp.ready();
-                        window.Telegram.WebApp.expand();
-                        user.value = window.Telegram.WebApp.initDataUnsafe?.user || { first_name: 'Guest' };
+                        const tg = window.Telegram.WebApp;
+                        tg.ready(); tg.expand();
+                        user.value = tg.initDataUnsafe?.user || { first_name: 'Collector' };
+                        tg.setHeaderColor(tg.themeParams.secondary_bg_color || '#f4f4f7');
                     }
                     loadData();
                 });
 
-                return { user, loading, error, gifts, commonBackdrops, activeTab, slots, pickerOpen, tempSelection, uniqueGifts, filteredModels, getBgStyle, openPicker, saveSelection, onGiftChange, resetSlot, addRow, removeRow };
+                return { user, loading, gifts, commonBackdrops, activeTab, slots, pickerOpen, tempSelection, uniqueGifts, filteredModels, getBgStyle, openPicker, saveSelection, selectBase, resetSlot, addRow, removeRow };
             }
         }).mount('#app');
     </script>
