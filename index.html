@@ -19,11 +19,7 @@
             background-color: var(--sec-bg-color);
             color: var(--text-color);
             font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-            user-select: none;
-        }
-        .glass {
-            background: rgba(var(--tg-theme-bg-color-rgb, 255, 255, 255), 0.75);
-            backdrop-filter: blur(20px);
+            overflow-x: hidden;
         }
         .slot-card {
             aspect-ratio: 1/1;
@@ -32,161 +28,128 @@
             overflow: hidden;
             position: relative;
             box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .slot-empty {
-            border: 2px dashed rgba(0,0,0,0.1);
-            background: linear-gradient(145deg, var(--bg-color), var(--sec-bg-color));
-            box-shadow: none;
-        }
-        
-        /* Рендер премиального градиента */
         .premium-bg {
             position: absolute;
             inset: 0;
-            width: 100%;
-            height: 100%;
             z-index: 1;
         }
-        
         .layer-gift {
             position: absolute;
             inset: 0;
-            width: 100%;
-            height: 100%;
             object-fit: contain;
             padding: 12%;
             z-index: 2;
-            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.15));
         }
-        
         .bottom-sheet {
             transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
             transform: translateY(100%);
         }
         .bottom-sheet.open { transform: translateY(0); }
-        
         .select-custom {
             width: 100%;
             padding: 16px;
             background: var(--sec-bg-color);
             border-radius: 16px;
-            font-weight: 600;
             appearance: none;
             outline: none;
-            font-size: 14px;
         }
     </style>
 </head>
 <body class="pb-32">
     <div id="app">
-        <!-- HEADER -->
-        <header class="p-6 flex justify-between items-center sticky top-0 z-40 bg-transparent">
-            <div class="flex items-center gap-4">
-                <img :src="user.photo_url || 'https://via.placeholder.com/100'" class="w-12 h-12 rounded-2xl shadow-md border-2 border-white">
-                <div>
-                    <h1 class="text-lg font-black tracking-tight">{{ user.first_name }}</h1>
-                    <p class="text-[10px] uppercase font-bold text-blue-500 tracking-widest">Master Designer</p>
-                </div>
-            </div>
-        </header>
+        <!-- ERROR OVERLAY (Debug Mode) -->
+        <div v-if="error" class="fixed inset-0 z-[100] bg-red-500 text-white p-10 overflow-auto">
+            <h1 class="text-2xl font-bold mb-4">Oops! Data Load Error</h1>
+            <p class="font-mono text-sm">{{ error }}</p>
+            <button @click="location.reload()" class="mt-10 px-6 py-3 bg-white text-red-500 rounded-xl font-bold">Try Reload</button>
+        </div>
 
-        <!-- BUILDER -->
-        <main v-if="activeTab === 'constructor'" class="px-6 space-y-6">
-            <div class="flex items-center justify-between">
-                <h2 class="text-3xl font-black italic uppercase tracking-tighter">Builder</h2>
-                <div class="flex gap-2">
-                    <button @click="removeRow" class="w-10 h-10 bg-white dark:bg-zinc-800 rounded-xl flex items-center justify-center text-red-500 active:scale-90 transition-all shadow-sm"><i class="fa-solid fa-minus"></i></button>
-                    <button @click="addRow" class="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center text-white active:scale-90 transition-all shadow-lg shadow-blue-500/30"><i class="fa-solid fa-plus"></i></button>
-                </div>
+        <div v-if="loading && !error" class="fixed inset-0 flex items-center justify-center bg-zinc-50 z-50">
+            <div class="flex flex-col items-center">
+                <div class="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                <p class="mt-4 font-bold opacity-30 uppercase tracking-widest text-xs">Loading Data...</p>
             </div>
+        </div>
 
-            <!-- GRID -->
-            <div class="grid grid-cols-3 gap-4">
-                <div v-for="(slot, index) in slots" :key="index" 
-                     @click="openPicker(index)"
-                     class="slot-card"
-                     :class="{'slot-empty': !slot.model}">
-                    
-                    <div v-if="slot.backdrop" class="premium-bg" :style="getBgStyle(slot.backdrop)"></div>
-                    <img v-if="slot.model" :src="slot.model.image_url" class="layer-gift">
-                    
-                    <div v-if="!slot.model" class="flex items-center justify-center h-full opacity-10">
-                        <i class="fa-solid fa-plus text-xl"></i>
+        <!-- APP CONTENT -->
+        <div v-if="!loading && !error">
+            <header class="p-6 flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                    <img :src="user.photo_url || 'https://via.placeholder.com/100'" class="w-12 h-12 rounded-2xl border-2 border-white shadow-sm">
+                    <h1 class="text-lg font-black">{{ user.first_name }}</h1>
+                </div>
+            </header>
+
+            <main class="px-6 space-y-6">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-3xl font-black italic uppercase italic">Builder</h2>
+                    <div class="flex gap-2">
+                        <button @click="removeRow" class="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-red-500"><i class="fa-solid fa-minus"></i></button>
+                        <button @click="addRow" class="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center text-white shadow-lg"><i class="fa-solid fa-plus"></i></button>
                     </div>
                 </div>
-            </div>
-        </main>
 
-        <!-- NAVIGATION -->
-        <nav class="glass fixed bottom-6 left-6 right-6 h-20 rounded-[30px] flex justify-around items-center px-8 z-50 shadow-2xl border border-white/20">
-            <div @click="activeTab = 'constructor'" :class="['nav-tab flex flex-col items-center gap-1 transition-all', activeTab === 'constructor' ? 'text-blue-500 scale-110' : 'opacity-30']">
-                <i class="fa-solid fa-square-plus text-xl"></i>
-                <span class="text-[9px] font-black uppercase">Builder</span>
-            </div>
-            <div @click="activeTab = 'collections'" :class="['nav-tab flex flex-col items-center gap-1 transition-all', activeTab === 'collections' ? 'text-blue-500 scale-110' : 'opacity-30']">
-                <i class="fa-solid fa-box-archive text-xl"></i>
-                <span class="text-[9px] font-black uppercase">Vault</span>
-            </div>
-        </nav>
-
-        <!-- PICKER SHEET -->
-        <div class="fixed inset-0 bg-black/60 z-[60] backdrop-blur-sm" v-if="pickerOpen" @click="pickerOpen = false"></div>
-        <div :class="['fixed bottom-0 left-0 right-0 bg-white dark:bg-zinc-900 rounded-t-[40px] z-[70] p-8 bottom-sheet max-h-[90vh] overflow-y-auto shadow-2xl', pickerOpen ? 'open' : '']">
-            <div class="w-16 h-1.5 bg-zinc-200 dark:bg-zinc-700 rounded-full mx-auto mb-8"></div>
-            
-            <!-- LIVE PREVIEW -->
-            <div class="flex justify-center mb-10">
-                <div class="w-56 h-56 slot-card shadow-2xl border-4 border-white">
-                    <div v-if="tempSelection.backdrop" class="premium-bg" :style="getBgStyle(tempSelection.backdrop)"></div>
-                    <img v-if="tempSelection.model" :src="tempSelection.model.image_url" class="layer-gift scale-110">
-                    <div v-if="!tempSelection.model" class="flex items-center justify-center h-full opacity-10 text-4xl"><i class="fa-solid fa-cube"></i></div>
+                <div class="grid grid-cols-3 gap-4">
+                    <div v-for="(slot, index) in slots" :key="index" @click="openPicker(index)" class="slot-card" :style="getBgStyle(slot.backdrop)">
+                        <img v-if="slot.model" :src="slot.model.image_url" class="layer-gift">
+                        <div v-if="!slot.model" class="flex items-center justify-center h-full opacity-10"><i class="fa-solid fa-plus"></i></div>
+                    </div>
                 </div>
-            </div>
+            </main>
 
-            <div class="space-y-6">
-                <div>
-                    <label class="text-[10px] font-black uppercase tracking-widest opacity-40 ml-1 mb-2 block">Base Gift</label>
+            <nav class="fixed bottom-6 left-6 right-6 h-20 rounded-[30px] flex justify-around items-center px-8 z-50 shadow-2xl border border-white/20 bg-white/80 backdrop-blur-xl">
+                <div @click="activeTab = 'constructor'" :class="['flex flex-col items-center gap-1', activeTab === 'constructor' ? 'text-blue-500' : 'opacity-30']">
+                    <i class="fa-solid fa-square-plus text-xl"></i>
+                    <span class="text-[9px] font-black uppercase">Builder</span>
+                </div>
+                <div @click="activeTab = 'collections'" :class="['flex flex-col items-center gap-1', activeTab === 'collections' ? 'text-blue-500' : 'opacity-30']">
+                    <i class="fa-solid fa-box-archive text-xl"></i>
+                    <span class="text-[9px] font-black uppercase">Vault</span>
+                </div>
+            </nav>
+
+            <!-- PICKER -->
+            <div class="fixed inset-0 bg-black/60 z-[60] backdrop-blur-sm" v-if="pickerOpen" @click="pickerOpen = false"></div>
+            <div :class="['fixed bottom-0 left-0 right-0 bg-white rounded-t-[40px] z-[70] p-8 bottom-sheet max-h-[90vh] overflow-y-auto', pickerOpen ? 'open' : '']">
+                <div class="w-16 h-1.5 bg-zinc-200 rounded-full mx-auto mb-8"></div>
+                <div class="flex justify-center mb-10">
+                    <div class="w-48 h-48 slot-card shadow-2xl" :style="getBgStyle(tempSelection.backdrop)">
+                        <img v-if="tempSelection.model" :src="tempSelection.model.image_url" class="layer-gift scale-110">
+                    </div>
+                </div>
+                <div class="space-y-6">
                     <select v-model="tempSelection.baseGift" @change="onGiftChange" class="select-custom">
                         <option value="" disabled>Select Gift</option>
                         <option v-for="name in uniqueGifts" :key="name" :value="name">{{ name }}</option>
                     </select>
-                </div>
-
-                <div>
-                    <label class="text-[10px] font-black uppercase tracking-widest opacity-40 ml-1 mb-2 block">Model Style</label>
                     <select v-model="tempSelection.model" :disabled="!tempSelection.baseGift" class="select-custom">
-                        <option :value="null">{{ tempSelection.baseGift ? 'Choose Variation' : '🔒 Choose gift first' }}</option>
+                        <option :value="null">Choose Model</option>
                         <option v-for="m in filteredModels" :key="m.id" :value="m">{{ m.name.split(':')[1] }}</option>
                     </select>
-                </div>
-
-                <div>
-                    <label class="text-[10px] font-black uppercase tracking-widest opacity-40 ml-1 mb-2 block">Color Palette</label>
                     <select v-model="tempSelection.backdrop" :disabled="!tempSelection.baseGift" class="select-custom">
-                        <option :value="null">{{ tempSelection.baseGift ? 'None (White)' : '🔒 Choose gift first' }}</option>
+                        <option :value="null">Choose Backdrop</option>
                         <option v-for="b in commonBackdrops" :key="b" :value="b">{{ b.name }}</option>
                     </select>
                 </div>
-            </div>
-
-            <div class="flex gap-4 mt-10">
-                <button @click="resetSlot" class="flex-1 py-5 bg-zinc-100 rounded-3xl font-black uppercase tracking-widest text-[10px]">Reset</button>
-                <button @click="saveSelection" class="flex-[2] py-5 bg-blue-500 text-white rounded-3xl font-black uppercase tracking-widest text-[10px] shadow-xl">Apply</button>
+                <div class="flex gap-4 mt-10">
+                    <button @click="resetSlot" class="flex-1 py-5 bg-zinc-100 rounded-3xl font-black uppercase text-[10px]">Reset</button>
+                    <button @click="saveSelection" class="flex-[2] py-5 bg-blue-500 text-white rounded-3xl font-black uppercase text-[10px]">Apply</button>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
         const { createApp, ref, computed, onMounted } = Vue;
-        const tg = window.Telegram.WebApp;
-
         createApp({
             setup() {
-                const activeTab = ref('constructor');
-                const user = ref(tg.initDataUnsafe?.user || { first_name: 'Guest' });
+                const user = ref({ first_name: 'Guest' });
+                const loading = ref(true);
+                const error = ref(null);
                 const gifts = ref([]);
                 const commonBackdrops = ref([]);
+                const activeTab = ref('constructor');
                 const slots = ref(Array(12).fill().map(() => ({ model: null, backdrop: null })));
                 const pickerOpen = ref(false);
                 const activeSlotIndex = ref(null);
@@ -194,25 +157,30 @@
 
                 const loadData = async () => {
                     try {
-                        const ts = Date.now();
+                        loading.value = true;
+                        const v = Date.now();
                         const [gRes, bRes] = await Promise.all([
-                            fetch(`gifts.json?v=${ts}`),
-                            fetch(`backdrops.json?v=${ts}`)
+                            fetch(`gifts.json?v=${v}`),
+                            fetch(`backdrops.json?v=${v}`)
                         ]);
+                        if (!gRes.ok) throw new Error(`gifts.json status: ${gRes.status}`);
+                        if (!bRes.ok) throw new Error(`backdrops.json status: ${bRes.status}`);
+                        
                         gifts.value = await gRes.json();
-                        if (bRes.ok) commonBackdrops.value = await bRes.json();
-                    } catch (e) { console.error(e); }
+                        commonBackdrops.value = await bRes.json();
+                        loading.value = false;
+                    } catch (e) {
+                        error.value = e.message;
+                        loading.value = false;
+                    }
                 };
 
                 const uniqueGifts = computed(() => [...new Set(gifts.value.map(g => g.name.split(':')[0].trim()))]);
                 const filteredModels = computed(() => gifts.value.filter(g => g.name.startsWith(tempSelection.value.baseGift)));
-
-                const getBgStyle = (backdrop) => {
-                    if (!backdrop || !backdrop.center) return {};
-                    // Реактивный рендер радиального градиента как в Telegram
-                    return {
-                        background: `radial-gradient(circle at center, ${backdrop.center} 0%, ${backdrop.edge} 100%)`
-                    };
+                
+                const getBgStyle = (bg) => {
+                    if (!bg || !bg.center) return {};
+                    return { background: `radial-gradient(circle at center, ${bg.center} 0%, ${bg.edge} 100%)` };
                 };
 
                 const openPicker = (index) => {
@@ -226,22 +194,22 @@
                     pickerOpen.value = true;
                 };
 
-                const saveSelection = () => {
-                    slots.value[activeSlotIndex.value] = { ...tempSelection.value };
-                    pickerOpen.value = false;
-                };
-
-                const resetSlot = () => { tempSelection.value = { baseGift: '', model: null, backdrop: null }; };
+                const saveSelection = () => { slots.value[activeSlotIndex.value] = { ...tempSelection.value }; pickerOpen.value = false; };
                 const onGiftChange = () => { tempSelection.value.model = null; tempSelection.value.backdrop = null; };
+                const resetSlot = () => { tempSelection.value = { baseGift: '', model: null, backdrop: null }; };
+                const addRow = () => slots.value.push(...Array(3).fill().map(() => ({ model: null, backdrop: null })));
+                const removeRow = () => { if (slots.value.length > 3) slots.value.splice(-3); };
 
                 onMounted(() => {
+                    if (window.Telegram?.WebApp) {
+                        window.Telegram.WebApp.ready();
+                        window.Telegram.WebApp.expand();
+                        user.value = window.Telegram.WebApp.initDataUnsafe?.user || { first_name: 'Guest' };
+                    }
                     loadData();
-                    tg.ready();
-                    tg.expand();
-                    tg.setHeaderColor(tg.themeParams.secondary_bg_color || '#f0f0f2');
                 });
 
-                return { activeTab, user, slots, addRow, removeRow, pickerOpen, tempSelection, uniqueGifts, filteredModels, commonBackdrops, openPicker, onGiftChange, saveSelection, resetSlot, getBgStyle };
+                return { user, loading, error, gifts, commonBackdrops, activeTab, slots, pickerOpen, tempSelection, uniqueGifts, filteredModels, getBgStyle, openPicker, saveSelection, onGiftChange, resetSlot, addRow, removeRow };
             }
         }).mount('#app');
     </script>
