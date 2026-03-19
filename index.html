@@ -256,8 +256,34 @@
         
         .color-dot { width: 12px; height: 12px; border-radius: 4px; margin-right: 14px; box-shadow: 0 0 10px rgba(255,255,255,0.2); }
 
-        /* Typography */
-        h1, h2, h3 { letter-spacing: -0.03em; }
+        /* AI Stylist Enhancements */
+        .ai-glow {
+            position: relative;
+        }
+        .ai-glow::after {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            background: linear-gradient(45deg, #007aff, #ff00ff, #007aff);
+            filter: blur(15px);
+            opacity: 0.3;
+            z-index: -1;
+            border-radius: inherit;
+            animation: rotate-glow 4s linear infinite;
+        }
+        @keyframes rotate-glow {
+            0% { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(360deg); }
+        }
+        .shimmer {
+            background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0) 100%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
     </style>
 </head>
 <body>
@@ -312,8 +338,42 @@
             <nav class="nav-bar">
                 <div @click="activeTab = 'constructor'" :class="{'active': activeTab === 'constructor'}" class="nav-item"><i class="fa-solid fa-compass-drafting"></i><span>Builder</span></div>
                 <div @click="activeTab = 'themed'; activeCurated = null" :class="{'active': activeTab === 'themed'}" class="nav-item"><i class="fa-solid fa-layer-group"></i><span>Explore</span></div>
+                <div @click="activeTab = 'ai'" :class="{'active': activeTab === 'ai'}" class="nav-item"><i class="fa-solid fa-wand-magic-sparkles text-pink-500"></i><span>AI Stylist</span></div>
                 <div @click="switchToVault" :class="{'active': activeTab === 'collections'}" class="nav-item"><i class="fa-solid fa-chess-rook"></i><span>Vault</span></div>
             </nav>
+
+            <!-- AI Stylist View -->
+            <main v-if="activeTab === 'ai'" class="px-6 animate-in slide-in-from-bottom duration-500 pb-20">
+                <div class="mb-10 text-center">
+                    <h2 class="text-3xl font-black uppercase italic mb-2 tracking-tighter">AI Stylist</h2>
+                    <p class="text-xs text-gray-500 font-medium uppercase tracking-widest">Perfect Vision Generator</p>
+                </div>
+
+                <div class="glass-panel p-6 rounded-[32px] mb-8">
+                    <label class="label">What's the vibe?</label>
+                    <div class="search-box mb-4">
+                        <input type="text" v-model="aiPrompt" placeholder="e.g. Neon Cyberpunk Night..." @keyup.enter="generateAICollection">
+                    </div>
+                    <button @click="generateAICollection" :disabled="aiLoading" class="btn-footer primary w-full flex items-center justify-center gap-3">
+                        <i v-if="aiLoading" class="fa-solid fa-spinner fa-spin"></i>
+                        <i v-else class="fa-solid fa-sparkles"></i>
+                        <span>{{ aiLoading ? 'Designing Concept...' : 'Generate Vision' }}</span>
+                    </button>
+                </div>
+
+                <div v-if="aiResult" class="animate-in fade-in zoom-in duration-700">
+                    <div class="flex justify-between items-center mb-6 px-2">
+                        <h3 class="text-sm font-bold uppercase tracking-widest text-gray-400">Preview Vision</h3>
+                        <button @click="applyAIVision" class="text-accent font-bold text-xs uppercase">Apply to Grid</button>
+                    </div>
+                    <div class="grid grid-cols-3 gap-3 mb-10">
+                        <div v-for="(slot, i) in aiResult.slots" :key="i" class="slot-card rounded-2xl border-white/5">
+                            <div class="premium-bg" :style="getBgStyle(slot.backdrop)"></div>
+                            <img :src="slot.model.image_url" class="layer-gift">
+                        </div>
+                    </div>
+                </div>
+            </main>
 
             <div :class="['bottom-sheet', pickerOpen ? 'open' : '']">
                 <div class="panel-header">
@@ -381,6 +441,11 @@
                 const vault = ref([]); const pickerOpen = ref(false); const activeSlotIndex = ref(null);
                 const tempSelection = ref({ baseGift: '', model: null, backdrop: null });
                 const activeCurated = ref(null); const currentMenu = ref(null); const menuSearch = ref('');
+                
+                // AI Stylist State
+                const aiPrompt = ref('');
+                const aiLoading = ref(false);
+                const aiResult = ref(null);
 
                 const loadData = async () => {
                     try {
@@ -438,7 +503,32 @@
                     loadData();
                 });
 
-                return { gifts, commonBackdrops, activeTab, slots, vault, pickerOpen, tempSelection, currentMenu, menuSearch, filteredBaseGifts, filteredModels, filteredBackdrops, openPicker, openMenu, selectBase, setTempModel, setTempBackdrop, saveSelection, resetSlot, getBgStyle, activeCurated, curatedList, curatedGifts, applyCurated, switchToVault, loadShowcase: (sc) => { slots.value = JSON.parse(JSON.stringify(sc.slots)); activeTab.value = 'constructor'; }, saveShowcase: () => {} };
+                return { 
+                    gifts, commonBackdrops, activeTab, slots, vault, pickerOpen, tempSelection, currentMenu, menuSearch, 
+                    filteredBaseGifts, filteredModels, filteredBackdrops, 
+                    openPicker, openMenu, selectBase, setTempModel, setTempBackdrop, saveSelection, resetSlot, getBgStyle, 
+                    activeCurated, curatedList, curatedGifts, applyCurated, switchToVault, 
+                    loadShowcase: (sc) => { slots.value = JSON.parse(JSON.stringify(sc.slots)); activeTab.value = 'constructor'; }, 
+                    saveShowcase: () => {},
+                    
+                    // AI Methods
+                    aiPrompt, aiLoading, aiResult,
+                    generateAICollection: async () => {
+                        if (!aiPrompt.value) return;
+                        aiLoading.value = true;
+                        try {
+                            const res = await fetch(`${API_BASE}/ai_stylist?prompt=${encodeURIComponent(aiPrompt.value)}`);
+                            if (res.ok) aiResult.value = await res.json();
+                        } catch (e) { console.error(e); }
+                        aiLoading.value = false;
+                    },
+                    applyAIVision: () => {
+                        if (!aiResult.value) return;
+                        slots.value = JSON.parse(JSON.stringify(aiResult.value.slots));
+                        activeTab.value = 'constructor';
+                        if (window.Telegram?.WebApp) Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+                    }
+                };
             }
         }).mount('#app');
     </script>
