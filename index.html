@@ -16,7 +16,8 @@
         .slot-card { aspect-ratio: 1/1; border-radius: 20px; position: relative; transition: all 0.3s ease; overflow: hidden; background: var(--panel-bg); border: 1px solid var(--border); }
         .premium-bg { position: absolute; inset: 0; z-index: 1; }
         .layer-gift { position: absolute; inset: 0; object-fit: contain; padding: 12%; z-index: 2; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.6)); pointer-events: none; }
-        .curated-card { background: var(--panel-bg); border-radius: 24px; padding: 22px 24px; border: 1px solid var(--border); cursor: pointer; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .curated-card { background: var(--panel-bg); border-radius: 24px; padding: 22px 24px; border: 1px solid var(--border); cursor: pointer; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; transition: all 0.2s; }
+        .curated-card:active { transform: scale(0.97); background: #222; }
         .curated-title { font-size: 16px; font-weight: 800; }
         .curated-tag { font-size: 8px; font-weight: 900; text-transform: uppercase; padding: 4px 10px; border-radius: 8px; background: rgba(255,255,255,0.04); color: var(--hint); }
         .bottom-sheet { position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg); z-index: 100; transition: transform 0.4s cubic-bezier(0.1, 0.7, 0.1, 1); transform: translateY(100%); border-radius: 32px 32px 0 0; display: flex; flex-direction: column; max-height: 94vh; }
@@ -39,6 +40,7 @@
         .search-box input { background: transparent; border: none; outline: none; color: #fff; flex: 1; }
         .menu-item { padding: 18px; border-radius: 16px; font-size: 15px; cursor: pointer; display: flex; align-items: center; gap: 14px; }
         .menu-item img { width: 40px; height: 40px; object-fit: contain; }
+        .color-dot { width: 10px; height: 10px; border-radius: 3px; margin-right: 14px; }
     </style>
 </head>
 <body>
@@ -52,7 +54,7 @@
                 </div>
             </header>
 
-            <main v-if="activeTab === 'constructor'" class="px-6">
+            <main v-if="activeTab === 'constructor'" class="px-6 animate-in fade-in duration-500">
                 <div class="grid grid-cols-3 gap-4">
                     <div v-for="(slot, index) in slots" :key="index" @click="openPicker(index)" class="slot-card">
                         <div v-if="slot.backdrop" class="premium-bg" :style="getBgStyle(slot.backdrop)"></div>
@@ -65,7 +67,10 @@
             <main v-if="activeTab === 'themed'" class="px-6 pb-10">
                 <div v-if="!activeCurated">
                     <div v-for="col in curatedList" :key="col.title" @click="activeCurated = col" class="curated-card">
-                        <div class="curated-title">{{ col.title }}</div>
+                        <div class="flex items-center">
+                            <div v-if="col.color" class="color-dot" :style="{background: col.color}"></div>
+                            <div class="curated-title">{{ col.title }}</div>
+                        </div>
                         <div class="curated-tag">{{ col.tag }}</div>
                     </div>
                 </div>
@@ -89,7 +94,7 @@
             <nav class="nav-bar glass-card">
                 <div @click="activeTab = 'constructor'" :class="{'active': activeTab === 'constructor'}" class="nav-item"><i class="fa-solid fa-compass-drafting"></i><span>Builder</span></div>
                 <div @click="activeTab = 'themed'; activeCurated = null" :class="{'active': activeTab === 'themed'}" class="nav-item"><i class="fa-solid fa-layer-group"></i><span>Explore</span></div>
-                <div @click="activeTab = 'collections'" :class="{'active': activeTab === 'collections'}" class="nav-item"><i class="fa-solid fa-chess-rook"></i><span>Vault</span></div>
+                <div @click="switchToVault" :class="{'active': activeTab === 'collections'}" class="nav-item"><i class="fa-solid fa-chess-rook"></i><span>Vault</span></div>
             </nav>
 
             <div :class="['bottom-sheet', pickerOpen ? 'open' : '']">
@@ -124,39 +129,48 @@
     </div>
     <script>
         const { createApp, ref, computed, onMounted } = Vue;
+        const API_BASE = "http://localhost:8000";
         createApp({
             setup() {
-                const gifts = ref([]); const commonBackdrops = ref([]); const activeTab = ref('constructor');
+                const user = ref({ id: 0, first_name: 'Collector' });
+                const gifts = ref([]); const commonBackdrops = ref([]); const curatedList = ref([]);
+                const activeTab = ref('constructor');
                 const slots = ref(Array(12).fill().map(() => ({ model: null, backdrop: null })));
                 const vault = ref([]); const pickerOpen = ref(false); const activeSlotIndex = ref(null);
                 const tempSelection = ref({ baseGift: '', model: null, backdrop: null });
                 const activeCurated = ref(null); const currentMenu = ref(null); const menuSearch = ref('');
-                const curatedList = [
-                    { title: "Adult 18+", tag: "HOT", models: ["Spanked: Precious Peach", "Adult tasks", "Peachless", "Secret Toys", "Missionary", "Mission Uranus"] },
-                    { title: "007 Agent", tag: "SPY", models: ["Swiss Watch", "Golden Gun", "Casino Royale"] },
-                    { title: "Old Money", tag: "RICH", models: ["Watch", "Pen", "Whisky", "Chess"] },
-                    { title: "Cyberpunk", tag: "NEON", models: ["Cyber", "Neon", "Laser", "Circuit"] },
-                    { title: "Red Passion", tag: "RED", keywords: ["red", "rose", "heart"] },
-                    { title: "Midnight Black", tag: "DARK", keywords: ["black", "dark", "shadow"] }
-                ];
+
                 const loadData = async () => {
-                    const [g, b] = await Promise.all([fetch('gifts.json').then(r => r.json()), fetch('backdrops.json').then(r => r.json())]);
-                    gifts.value = g; commonBackdrops.value = b;
+                    try {
+                        const [g, b, c] = await Promise.all([
+                            fetch('gifts.json').then(r => r.json()),
+                            fetch('backdrops.json').then(r => r.json()),
+                            fetch('collections.json').then(r => r.json())
+                        ]);
+                        gifts.value = g; commonBackdrops.value = b; curatedList.value = c;
+                    } catch (e) { console.error("Error loading data:", e); }
                 };
+
                 const curatedGifts = computed(() => {
                     if (!activeCurated.value) return [];
                     const names = activeCurated.value.models || [];
                     const keywords = activeCurated.value.keywords || [];
-                    return gifts.value.filter(g => names.some(n => g.name.includes(n)) || keywords.some(k => g.name.toLowerCase().includes(k))).slice(0, 20);
+                    return gifts.value.filter(g => {
+                        const lowName = g.name.toLowerCase();
+                        return names.some(n => lowName.includes(n.toLowerCase())) || keywords.some(k => lowName.includes(k.toLowerCase()));
+                    }).slice(0, 40);
                 });
+
                 const applyCurated = (gift) => {
                     const idx = slots.value.findIndex(s => !s.model);
-                    slots.value[idx !== -1 ? idx : 0] = { baseGift: gift.name.split(':')[0], model: gift, backdrop: commonBackdrops.value[0] };
+                    slots.value[idx !== -1 ? idx : 0] = { baseGift: gift.name.split(':')[0].trim(), model: JSON.parse(JSON.stringify(gift)), backdrop: commonBackdrops.value[0] || null };
                     activeTab.value = 'constructor';
+                    if (window.Telegram?.WebApp) Telegram.WebApp.HapticFeedback.notificationOccurred('success');
                 };
+
                 const openPicker = (i) => { activeSlotIndex.value = i; tempSelection.value = JSON.parse(JSON.stringify(slots.value[i])); pickerOpen.value = true; };
                 const openMenu = (m) => { currentMenu.value = m; menuSearch.value = ''; };
-                const filteredBaseGifts = computed(() => [...new Set(gifts.value.map(g => g.name.split(':')[0]))].filter(n => n.toLowerCase().includes(menuSearch.value.toLowerCase())).slice(0, 30));
+                const filteredBaseGifts = computed(() => [...new Set(gifts.value.map(g => g.name.split(':')[0].trim()))].filter(n => n.toLowerCase().includes(menuSearch.value.toLowerCase())).slice(0, 30));
                 const filteredModels = computed(() => gifts.value.filter(g => g.name.startsWith(tempSelection.value.baseGift) && g.name.toLowerCase().includes(menuSearch.value.toLowerCase())));
                 const filteredBackdrops = computed(() => commonBackdrops.value.filter(b => b.name.toLowerCase().includes(menuSearch.value.toLowerCase())));
                 const selectBase = (n) => { tempSelection.value.baseGift = n; tempSelection.value.model = null; currentMenu.value = null; };
@@ -164,9 +178,25 @@
                 const setTempBackdrop = (b) => { tempSelection.value.backdrop = b; currentMenu.value = null; };
                 const saveSelection = () => { slots.value[activeSlotIndex.value] = JSON.parse(JSON.stringify(tempSelection.value)); pickerOpen.value = false; };
                 const resetSlot = () => { tempSelection.value = { baseGift: '', model: null, backdrop: null }; };
-                const getBgStyle = (bg) => bg?.center ? { background: `radial-gradient(circle, ${bg.center} 0%, ${bg.edge} 100%)` } : {};
-                onMounted(loadData);
-                return { gifts, commonBackdrops, activeTab, slots, vault, pickerOpen, tempSelection, currentMenu, menuSearch, filteredBaseGifts, filteredModels, filteredBackdrops, openPicker, openMenu, selectBase, setTempModel, setTempBackdrop, saveSelection, resetSlot, getBgStyle, activeCurated, curatedList, curatedGifts, applyCurated, saveShowcase: () => {} };
+                const getBgStyle = (bg) => bg?.center ? { background: `radial-gradient(circle at 50% 50%, ${bg.center} 0%, ${bg.edge} 100%)` } : {};
+                const switchToVault = async () => {
+                    activeTab.value = 'collections';
+                    try {
+                        const res = await fetch(`${API_BASE}/get_showcases?user_id=${user.value.id}`);
+                        if (res.ok) vault.value = await res.json();
+                    } catch (e) {}
+                };
+
+                onMounted(() => {
+                    if (window.Telegram?.WebApp) {
+                        const tg = window.Telegram.WebApp;
+                        tg.ready(); tg.expand();
+                        if (tg.initDataUnsafe?.user) user.value = { id: tg.initDataUnsafe.user.id, first_name: tg.initDataUnsafe.user.first_name };
+                    }
+                    loadData();
+                });
+
+                return { gifts, commonBackdrops, activeTab, slots, vault, pickerOpen, tempSelection, currentMenu, menuSearch, filteredBaseGifts, filteredModels, filteredBackdrops, openPicker, openMenu, selectBase, setTempModel, setTempBackdrop, saveSelection, resetSlot, getBgStyle, activeCurated, curatedList, curatedGifts, applyCurated, switchToVault, loadShowcase: (sc) => { slots.value = JSON.parse(JSON.stringify(sc.slots)); activeTab.value = 'constructor'; }, saveShowcase: () => {} };
             }
         }).mount('#app');
     </script>

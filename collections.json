@@ -1,0 +1,70 @@
+[
+  {
+    "title": "Harry Potter",
+    "tag": "Magic",
+    "models": ["Thunderbird", "Unicorn Blood", "The Seeker", "Star Prize", "Amortentia", "Unicorn Tears", "Felix Felicis", "Moonstone", "Laugh Potion", "Manticore", "Hippogriff", "Gryffindor", "Phoenix", "Slytherin", "Hufflepuff", "Ravenclaw", "Sorting Cat", "Merlin", "Butterbeer", "Nimbus", "Dobby", "Malfoy", "Free Elf", "Morgana", "Wizard Boy", "Lovegood", "Diggory", "Happy Brownie"]
+  },
+  {
+    "title": "Minecraft",
+    "tag": "Gaming",
+    "models": ["Zombie Rider", "Grass Block", "Buzzy Bee", "Dirt Diamond", "The Nether", "Endercat", "Steve", "Creeper", "Steve's Pet", "Nether House", "Minehouse", "Ender Estate", "Bedrock", "Crimson Cabin", "Ender Snake", "Diamondback", "Gold Rush", "Iron Mine", "Chicken", "Ice Craft"]
+  },
+  {
+    "title": "Star Wars",
+    "tag": "Sci-Fi",
+    "models": ["May the Fourth", "Dark Side", "Star Fighter", "Bounty Hunter", "Darth Vader", "Death Star", "Wrath of Vader", "Fury of Kylo", "Padme", "Dark Lord", "The Skywalker", "Jedi Luke", "Might of Maul", "R2D2", "Master Yoda", "Tie Fighter", "Desert Friend", "Rebel Kit", "Darksaber", "Baby Yoda", "Kenobi", "Chosen One", "A New Hope", "Space Merc", "Rebel Award", "Hyperdrive", "Jedi Princess", "Windu"]
+  },
+  {
+    "title": "Lord of the Rings",
+    "tag": "Fantasy",
+    "models": ["Elven Might", "Gold Dragon", "Druid Circle", "Ring of Power", "Sauron", "Bag End", "Elven Shade", "Mirkwood", "The Hobbit", "Radagast", "Krakatoa", "Mordor", "Red Dwarf", "Vineyard", "Green Dragon", "Elven Tears", "Lorien", "Lindon", "My Precious", "Druidic", "Hobbit", "Lothlrorien", "Lorendale", "Druid Snack", "Elven Bakery", "Hellspawn"]
+  },
+  {
+    "title": "Crypto & Money",
+    "tag": "Wealth",
+    "models": ["Pepperoni", "Crypto Byte", "Crypto Punk", "Market Rally", "Crypto Gem", "Grizzly Bear", "Red Bull", "Road Ape", "Pizza", "Day Trader", "Crypto Whale", "Wall Street", "Trade Ledger", "Doge Gem", "Tired Primate", "Cryptid", "Trader", "Hamster", "Bull Market", "Bear Market", "Sell High", "Buy Low", "Cash Bags", "Cash Machine", "Fiscal Hawk", "Payday", "Scrooge", "Cash Roll", "Safe Box", "Money Bag", "Piggy Bank", "Fortune", "Bank Heist", "Dolla Rolla", "Snoopcoins"]
+  },
+  {
+    "title": "Adult 18+",
+    "tag": "Explicit",
+    "models": ["Spanked", "Red Lipstick", "Rear End", "Overlord", "Pink Latex", "Secret Toys", "Succubus", "Adult Toy", "First Kiss", "Peachless", "Kinky Stinky", "Bondage", "Submit Button", "Shirtless", "Adult Tasks", "Lovemobile", "Missionary", "Uranus", "Doggystyle"]
+  },
+  {
+    "title": "Pirates",
+    "tag": "Sea",
+    "models": ["Compass", "Pirate", "Polaris", "Iron Hook", "Crossbones", "Treasure Map", "Kraken", "Cthulhu", "Jack Sparrow", "Tortuga", "Cathulhu", "Jolly Roger", "Black Beard", "Mermaid", "Peg Leg"]
+  },
+  {
+    "title": "American Dream",
+    "tag": "Culture",
+    "models": ["Best Muscles", "Liberty", "Air Force One", "Falcon", "Patriot", "Tesla Frog", "Musk", "Edison", "United States", "Sheriff", "Hollywood", "Malibu", "Chevy 1964", "Original Cola", "Area 51", "Great Again", "Space Bot", "Highway", "Steve Jobs", "Columbus", "Team USA", "Super Bowl"]
+  },
+  {
+    "title": "Egypt",
+    "tag": "History",
+    "models": ["Gymhotep", "Pharaoh", "Mummy", "Scorpion", "Pyramid", "Mummify", "Sarcophagus", "Ankh", "Sphinx", "Sekhmet", "Obelisk", "Bastet"]
+  },
+  {
+    "title": "Pepe",
+    "tag": "Meme",
+    "models": ["Turtles", "Turbo Frog", "Pepe Band", "Pepe Bag", "Happy Pepe", "Hue Jester", "Froge Ring", "Froggy", "Meme God", "Pepe Diary", "Pepe Frost", "Pepe Feels", "Pepe Love", "Pepe Paws", "Little Pepe", "Le Pepe", "Pepe Socks", "Boiled Pepe"]
+  },
+  {
+    "title": "Colors: Red",
+    "color": "#ff3b30",
+    "tag": "Color",
+    "keywords": ["red", "rose", "ruby", "heart", "lava", "crimson", "fire", "cherry"]
+  },
+  {
+    "title": "Colors: Blue",
+    "color": "#007aff",
+    "tag": "Color",
+    "keywords": ["blue", "ocean", "sea", "wave", "azure", "ice", "sapphire", "water"]
+  },
+  {
+    "title": "Colors: Gold",
+    "color": "#ffcc00",
+    "tag": "Color",
+    "keywords": ["gold", "golden", "rich", "sun", "wealth", "crown", "999"]
+  }
+]
