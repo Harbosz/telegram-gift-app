@@ -24,7 +24,8 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* Glass Effects */
+        [v-cloak] { display: none; }
+
         .glass-card {
             background: rgba(var(--tg-theme-bg-color-rgb, 255, 255, 255), 0.8);
             backdrop-filter: blur(25px);
@@ -36,12 +37,13 @@
             aspect-ratio: 1/1;
             border-radius: 28px;
             position: relative;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: all 0.3s ease;
             overflow: hidden;
             box-shadow: 0 10px 30px -10px rgba(0,0,0,0.1);
+            cursor: grab;
         }
-
-        .slot-card:active { transform: scale(0.92); }
+        .slot-card:active { cursor: grabbing; }
+        .slot-card.drag-over { border: 2px solid var(--accent); transform: scale(1.05); }
 
         .slot-empty {
             background: var(--bg);
@@ -49,13 +51,7 @@
             box-shadow: none;
         }
 
-        .premium-bg {
-            position: absolute;
-            inset: 0;
-            z-index: 1;
-            transition: background 0.5s ease;
-        }
-
+        .premium-bg { position: absolute; inset: 0; z-index: 1; }
         .layer-gift {
             position: absolute;
             inset: 0;
@@ -63,12 +59,7 @@
             padding: 12%;
             z-index: 2;
             filter: drop-shadow(0 15px 25px rgba(0,0,0,0.2));
-            animation: floating 3s ease-in-out infinite;
-        }
-
-        @keyframes floating {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
+            pointer-events: none;
         }
 
         .bottom-sheet {
@@ -78,170 +69,194 @@
         }
         .bottom-sheet.open { transform: translateY(0); }
 
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 0; background: transparent; }
-
-        .btn-action {
-            transition: all 0.2s;
-            font-weight: 700;
-            letter-spacing: -0.02em;
+        .search-input {
+            width: 100%;
+            background: rgba(0,0,0,0.03);
+            border: 1px solid rgba(0,0,0,0.05);
+            border-radius: 16px;
+            padding: 12px 16px;
+            font-size: 14px;
+            font-weight: 600;
+            outline: none;
         }
-        .btn-action:active { transform: scale(0.96); opacity: 0.9; }
+        .search-input:focus { background: #fff; border-color: var(--accent); }
 
-        /* Fancy Select Replacement */
-        .chip-select {
-            display: flex;
-            gap: 8px;
-            overflow-x: auto;
-            padding: 4px;
-            margin: 0 -32px;
-            padding-left: 32px;
-            padding-right: 32px;
+        .dropdown-list {
+            max-height: 200px;
+            overflow-y: auto;
+            background: #fff;
+            border-radius: 16px;
+            margin-top: 8px;
+            border: 1px solid rgba(0,0,0,0.05);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
         }
-        .chip {
-            white-space: nowrap;
-            padding: 12px 20px;
-            border-radius: 18px;
-            background: var(--sec-bg);
+        .dropdown-item {
+            padding: 12px 16px;
             font-size: 13px;
             font-weight: 600;
-            border: 1px solid rgba(0,0,0,0.03);
+            cursor: pointer;
+        }
+        .dropdown-item:hover { background: rgba(0,122,255,0.05); color: var(--accent); }
+        .dropdown-item.active { background: var(--accent); color: #fff; }
+
+        .btn-action { transition: all 0.2s; font-weight: 700; }
+        .btn-action:active { transform: scale(0.96); opacity: 0.9; }
+
+        .vault-card {
+            background: var(--bg);
+            border-radius: 24px;
+            padding: 16px;
+            margin-bottom: 16px;
+            border: 1px solid rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            gap: 16px;
             transition: all 0.2s;
         }
-        .chip.active {
-            background: var(--accent);
-            color: white;
-            box-shadow: 0 8px 20px -5px rgba(0,122,255,0.4);
+        .vault-card:active { transform: scale(0.98); }
+        .vault-preview {
+            width: 60px;
+            height: 60px;
+            background: #f0f0f0;
+            border-radius: 16px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2px;
+            padding: 4px;
+            overflow: hidden;
         }
+        .preview-dot { width: 100%; height: 100%; border-radius: 4px; }
     </style>
 </head>
-<body class="pb-36">
-    <div id="app">
-        <!-- APP CONTENT -->
-        <div v-if="!loading" class="animate-in fade-in duration-700">
+<body>
+    <div id="app" v-cloak>
+        <div class="min-h-screen max-w-md mx-auto relative pb-32">
             <!-- HEADER -->
             <header class="p-8 flex justify-between items-center">
-                <div class="flex items-center gap-4">
-                    <div class="relative">
-                        <img :src="user.photo_url || 'https://via.placeholder.com/100'" class="w-14 h-14 rounded-[22px] border-4 border-white shadow-xl">
-                        <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-4 border-white rounded-full"></div>
-                    </div>
-                    <div>
-                        <h1 class="text-xl font-black tracking-tight">{{ user.first_name }}</h1>
-                        <p class="text-[10px] uppercase font-black text-blue-500 tracking-[0.2em] opacity-80">Elite Architect</p>
-                    </div>
+                <div>
+                    <h1 class="text-3xl font-black italic uppercase tracking-tighter leading-none">Studio<br><span class="text-blue-500">Elite</span></h1>
                 </div>
-                <div class="w-12 h-12 glass-card rounded-2xl flex items-center justify-center shadow-sm">
-                    <i class="fa-solid fa-bolt-lightning text-blue-500"></i>
+                <div v-if="activeTab === 'constructor'" class="flex gap-2">
+                    <button @click="saveShowcase" :disabled="isSaving" class="px-6 py-3 bg-blue-500 text-white rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-lg shadow-blue-500/20 btn-action disabled:opacity-50">
+                        {{ isSaving ? 'Saving...' : 'Save' }}
+                    </button>
                 </div>
             </header>
 
-            <!-- BUILDER SECTION -->
-            <main v-if="activeTab === 'constructor'" class="px-8 space-y-8">
-                <div class="flex items-end justify-between">
-                    <div>
-                        <h2 class="text-4xl font-black italic tracking-tighter uppercase leading-none">Studio</h2>
-                        <p class="text-[11px] opacity-40 font-bold mt-2 uppercase tracking-widest">Designing your legacy</p>
-                    </div>
-                    <div class="flex gap-3">
-                        <button @click="removeRow" class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-red-500 shadow-sm btn-action"><i class="fa-solid fa-minus"></i></button>
-                        <button @click="addRow" class="w-12 h-12 bg-blue-500 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-blue-500/30 btn-action"><i class="fa-solid fa-plus"></i></button>
+            <!-- CONSTRUCTOR TAB -->
+            <main v-if="activeTab === 'constructor'" class="px-8 animate-in fade-in slide-in-from-bottom-5 duration-700">
+                <div class="flex justify-between items-end mb-8">
+                    <h2 class="text-xs font-black uppercase tracking-[0.3em] opacity-20">Showcase Layout</h2>
+                    <div class="flex gap-2">
+                        <button @click="removeRow" class="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center text-[10px]"><i class="fa-solid fa-minus"></i></button>
+                        <button @click="addRow" class="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center text-[10px]"><i class="fa-solid fa-plus"></i></button>
                     </div>
                 </div>
 
-                <!-- GRID -->
                 <div class="grid grid-cols-3 gap-5">
                     <div v-for="(slot, index) in slots" :key="index" 
                          @click="openPicker(index)"
                          class="slot-card"
-                         :class="{'slot-empty': !slot.model}">
+                         :class="{'slot-empty': !slot.model, 'drag-over': dragOverIndex === index}"
+                         draggable="true"
+                         @dragstart="handleDragStart($event, index)"
+                         @dragover.prevent="handleDragOver($event, index)"
+                         @dragleave="handleDragLeave"
+                         @drop="handleDrop($event, index)">
                         
                         <div v-if="slot.backdrop" class="premium-bg" :style="getBgStyle(slot.backdrop)"></div>
                         <img v-if="slot.model" :src="slot.model.image_url" class="layer-gift">
-                        
-                        <div v-if="!slot.model" class="flex items-center justify-center h-full opacity-5">
-                            <i class="fa-solid fa-plus text-2xl"></i>
-                        </div>
+                        <div v-if="!slot.model" class="flex items-center justify-center h-full opacity-5"><i class="fa-solid fa-plus text-2xl"></i></div>
                     </div>
                 </div>
             </main>
 
-            <!-- VAULT SECTION -->
-            <main v-if="activeTab === 'collections'" class="p-12 text-center flex flex-col items-center animate-in zoom-in-95 duration-500">
-                <div class="w-24 h-24 bg-white rounded-[40px] flex items-center justify-center mb-6 shadow-2xl">
-                    <i class="fa-solid fa-chess-rook text-4xl text-blue-500/20"></i>
+            <!-- VAULT TAB -->
+            <main v-if="activeTab === 'collections'" class="px-8 animate-in fade-in slide-in-from-bottom-5 duration-700">
+                <h2 class="text-xs font-black uppercase tracking-[0.3em] opacity-20 mb-8">Your Collections</h2>
+                
+                <div v-if="vault.length === 0" class="p-12 text-center flex flex-col items-center">
+                    <div class="w-24 h-24 bg-white rounded-[40px] flex items-center justify-center mb-6 shadow-2xl">
+                        <i class="fa-solid fa-chess-rook text-4xl text-blue-500/20"></i>
+                    </div>
+                    <p class="text-xs font-bold opacity-20 mt-2 uppercase tracking-widest">No collections found</p>
                 </div>
-                <h3 class="font-black italic uppercase text-lg tracking-widest opacity-20">The Vault</h3>
-                <p class="text-xs font-bold opacity-20 mt-2 uppercase tracking-tighter">Your collection is empty</p>
+
+                <div v-for="sc in vault" :key="sc.id" @click="loadShowcase(sc)" class="vault-card btn-action">
+                    <div class="vault-preview">
+                        <div v-for="s in sc.slots.slice(0, 4)" :key="s" class="preview-dot" :style="getBgStyle(s.backdrop || {center: '#eee', edge: '#ddd'})"></div>
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="font-black uppercase text-sm tracking-tight">{{ sc.name }}</h4>
+                        <p class="text-[10px] font-bold opacity-30 mt-1">{{ sc.created_at }} • {{ sc.slots.filter(s => s.model).length }} models</p>
+                    </div>
+                    <i class="fa-solid fa-chevron-right opacity-20"></i>
+                </div>
             </main>
 
             <!-- NAVIGATION -->
-            <nav class="fixed bottom-8 left-8 right-8 h-22 rounded-[40px] glass-card flex justify-around items-center px-10 z-50 shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-white/40">
-                <div @click="activeTab = 'constructor'" :class="['flex flex-col items-center gap-1.5 transition-all duration-300', activeTab === 'constructor' ? 'text-blue-500 scale-110' : 'opacity-20']">
-                    <i class="fa-solid fa-compass-drafting text-2xl"></i>
+            <nav class="fixed bottom-8 left-8 right-8 h-20 rounded-[40px] glass-card flex justify-around items-center px-10 z-50 shadow-2xl">
+                <div @click="activeTab = 'constructor'" :class="['flex flex-col items-center gap-1.5 transition-all', activeTab === 'constructor' ? 'text-blue-500' : 'opacity-20']">
+                    <i class="fa-solid fa-compass-drafting text-xl"></i>
                     <span class="text-[8px] font-black uppercase tracking-widest">Builder</span>
                 </div>
-                <div @click="activeTab = 'collections'" :class="['flex flex-col items-center gap-1.5 transition-all duration-300', activeTab === 'collections' ? 'text-blue-500 scale-110' : 'opacity-20']">
-                    <i class="fa-solid fa-boxes-stacked text-2xl"></i>
+                <div @click="switchToVault" :class="['flex flex-col items-center gap-1.5 transition-all', activeTab === 'collections' ? 'text-blue-500' : 'opacity-20']">
+                    <i class="fa-solid fa-boxes-stacked text-xl"></i>
                     <span class="text-[8px] font-black uppercase tracking-widest">Vault</span>
                 </div>
             </nav>
 
             <!-- PICKER SHEET -->
             <div class="fixed inset-0 bg-black/40 z-[60] backdrop-blur-md transition-opacity duration-500" v-if="pickerOpen" @click="pickerOpen = false"></div>
-            <div :class="['fixed bottom-0 left-0 right-0 bg-white dark:bg-zinc-950 z-[70] p-10 bottom-sheet max-h-[92vh] overflow-y-auto shadow-2xl', pickerOpen ? 'open' : '']">
-                <div class="w-20 h-1.5 bg-zinc-100 rounded-full mx-auto mb-10 opacity-50"></div>
-                
-                <h3 class="text-3xl font-black italic uppercase tracking-tighter mb-10 text-center leading-none">Configure<br><span class="text-blue-500">Masterpiece</span></h3>
+            <div :class="['fixed bottom-0 left-0 right-0 bg-white dark:bg-zinc-950 z-[70] p-8 bottom-sheet max-h-[92vh] overflow-y-auto', pickerOpen ? 'open' : '']">
+                <div class="w-16 h-1 bg-zinc-100 rounded-full mx-auto mb-8 opacity-50"></div>
+                <h3 class="text-2xl font-black italic uppercase tracking-tighter mb-8 text-center leading-none">Configure <span class="text-blue-500">Slot</span></h3>
 
-                <!-- PREVIEW BOX -->
-                <div class="flex justify-center mb-12">
-                    <div class="w-64 h-64 slot-card shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)] border-[6px] border-white dark:border-zinc-800 scale-105">
+                <div class="flex justify-center mb-10">
+                    <div class="w-48 h-48 slot-card shadow-2xl border-4 border-white dark:border-zinc-800">
                         <div v-if="tempSelection.backdrop" class="premium-bg" :style="getBgStyle(tempSelection.backdrop)"></div>
-                        <img v-if="tempSelection.model" :src="tempSelection.model.image_url" class="layer-gift scale-110">
-                        <div v-if="!tempSelection.model" class="flex items-center justify-center h-full opacity-10 text-5xl"><i class="fa-solid fa-fingerprint"></i></div>
+                        <img v-if="tempSelection.model" :src="tempSelection.model.image_url" class="layer-gift">
                     </div>
                 </div>
 
-                <!-- CHIP SELECTORS -->
-                <div class="space-y-8">
+                <div class="space-y-6">
                     <div>
-                        <p class="text-[10px] font-black uppercase tracking-[0.2em] opacity-30 mb-4 ml-1">1. Base Structure</p>
-                        <div class="chip-select">
-                            <div v-for="name in uniqueGifts" :key="name" 
-                                 @click="selectBase(name)"
-                                 :class="['chip', tempSelection.baseGift === name ? 'active' : '']">
-                                {{ name }}
-                            </div>
+                        <p class="text-[10px] font-black uppercase tracking-[0.2em] opacity-30 mb-2 ml-1">1. Base Structure</p>
+                        <input type="text" v-model="searchGifts" placeholder="Search base gift..." class="search-input">
+                        <div v-if="searchGifts || !tempSelection.baseGift" class="dropdown-list">
+                            <div v-for="name in filteredBaseGifts" :key="name" @click="selectBase(name)" :class="['dropdown-item', tempSelection.baseGift === name ? 'active' : '']">{{ name }}</div>
+                        </div>
+                        <div v-else class="mt-2 flex items-center gap-2 text-xs font-bold text-blue-500 bg-blue-50 p-3 rounded-xl" @click="searchGifts = ''">
+                            <i class="fa-solid fa-check"></i> Selected: {{ tempSelection.baseGift }}
                         </div>
                     </div>
 
                     <div :class="{'opacity-20 pointer-events-none': !tempSelection.baseGift}">
-                        <p class="text-[10px] font-black uppercase tracking-[0.2em] opacity-30 mb-4 ml-1">2. Visual Style</p>
-                        <div class="chip-select">
-                            <div v-for="m in filteredModels" :key="m.id" 
-                                 @click="tempSelection.model = m"
-                                 :class="['chip', tempSelection.model?.id === m.id ? 'active' : '']">
-                                {{ m.name.split(':')[1] }}
-                            </div>
+                        <p class="text-[10px] font-black uppercase tracking-[0.2em] opacity-30 mb-2 ml-1">2. Visual Style</p>
+                        <input type="text" v-model="searchModels" placeholder="Search model style..." class="search-input">
+                        <div v-if="searchModels || !tempSelection.model" class="dropdown-list">
+                            <div v-for="m in filteredModels" :key="m.id" @click="tempSelection.model = m" :class="['dropdown-item', tempSelection.model?.id === m.id ? 'active' : '']">{{ m.name.split(':')[1] || m.name }}</div>
+                        </div>
+                        <div v-else class="mt-2 flex items-center gap-2 text-xs font-bold text-blue-500 bg-blue-50 p-3 rounded-xl" @click="searchModels = ''">
+                            <i class="fa-solid fa-brush"></i> Style: {{ tempSelection.model?.name.split(':')[1] }}
                         </div>
                     </div>
 
-                    <div :class="{'opacity-20 pointer-events-none': !tempSelection.baseGift}">
-                        <p class="text-[10px] font-black uppercase tracking-[0.2em] opacity-30 mb-4 ml-1">3. Environment</p>
-                        <div class="chip-select">
-                            <div v-for="b in commonBackdrops" :key="b.name" 
-                                 @click="tempSelection.backdrop = b"
-                                 :class="['chip', tempSelection.backdrop?.name === b.name ? 'active' : '']">
-                                {{ b.name }}
-                            </div>
+                    <div>
+                        <p class="text-[10px] font-black uppercase tracking-[0.2em] opacity-30 mb-2 ml-1">3. Environment</p>
+                        <input type="text" v-model="searchBackdrops" placeholder="Search backdrop..." class="search-input">
+                        <div v-if="searchBackdrops || !tempSelection.backdrop" class="dropdown-list">
+                            <div v-for="b in filteredBackdrops" :key="b.name" @click="tempSelection.backdrop = b" :class="['dropdown-item', tempSelection.backdrop?.name === b.name ? 'active' : '']">{{ b.name }}</div>
+                        </div>
+                        <div v-else class="mt-2 flex items-center gap-2 text-xs font-bold text-blue-500 bg-blue-50 p-3 rounded-xl" @click="searchBackdrops = ''">
+                            <i class="fa-solid fa-palette"></i> Backdrop: {{ tempSelection.backdrop?.name }}
                         </div>
                     </div>
                 </div>
 
-                <div class="flex gap-5 mt-14">
-                    <button @click="resetSlot" class="flex-1 py-6 bg-zinc-50 dark:bg-zinc-900 text-zinc-400 rounded-3xl font-black uppercase tracking-widest text-[10px] btn-action">Reset</button>
-                    <button @click="saveSelection" class="flex-[2] py-6 bg-blue-500 text-white rounded-3xl font-black uppercase tracking-widest text-[10px] shadow-2xl shadow-blue-500/40 btn-action">Authorize</button>
+                <div class="flex gap-4 mt-12">
+                    <button @click="resetSlot" class="flex-1 py-5 bg-zinc-50 dark:bg-zinc-900 text-zinc-400 rounded-3xl font-black uppercase tracking-widest text-[10px] btn-action">Reset</button>
+                    <button @click="saveSelection" class="flex-[2] py-5 bg-blue-500 text-white rounded-3xl font-black uppercase tracking-widest text-[10px] shadow-2xl shadow-blue-500/40 btn-action">Confirm</button>
                 </div>
             </div>
         </div>
@@ -249,33 +264,86 @@
 
     <script>
         const { createApp, ref, computed, onMounted } = Vue;
+        const API_BASE = "http://localhost:8000"; // Измени на свой URL если нужно
+
         createApp({
             setup() {
-                const user = ref({ first_name: 'Collector' });
-                const loading = ref(true);
+                const user = ref({ id: 0, first_name: 'Collector' });
                 const gifts = ref([]);
                 const commonBackdrops = ref([]);
                 const activeTab = ref('constructor');
                 const slots = ref(Array(12).fill().map(() => ({ model: null, backdrop: null })));
+                const vault = ref([]);
+                const isSaving = ref(false);
                 const pickerOpen = ref(false);
                 const activeSlotIndex = ref(null);
                 const tempSelection = ref({ baseGift: '', model: null, backdrop: null });
 
+                const searchGifts = ref('');
+                const searchModels = ref('');
+                const searchBackdrops = ref('');
+                const dragSourceIndex = ref(null);
+                const dragOverIndex = ref(null);
+
                 const loadData = async () => {
                     try {
-                        const ts = Date.now();
-                        const [gRes, bRes] = await Promise.all([
-                            fetch(`gifts.json?v=${ts}`),
-                            fetch(`backdrops.json?v=${ts}`)
-                        ]);
+                        const [gRes, bRes] = await Promise.all([ fetch('gifts.json'), fetch('backdrops.json') ]);
                         gifts.value = await gRes.json();
                         commonBackdrops.value = await bRes.json();
-                        loading.value = false;
                     } catch (e) { console.error(e); }
                 };
 
-                const uniqueGifts = computed(() => [...new Set(gifts.value.map(g => g.name.split(':')[0].trim()))]);
-                const filteredModels = computed(() => gifts.value.filter(g => g.name.startsWith(tempSelection.value.baseGift)));
+                const fetchVault = async () => {
+                    try {
+                        const res = await fetch(`${API_BASE}/get_showcases?user_id=${user.value.id}`);
+                        vault.value = await res.json();
+                    } catch (e) { console.error(e); }
+                };
+
+                const saveShowcase = async () => {
+                    if (slots.value.every(s => !s.model)) return alert("Add some gifts first!");
+                    const name = prompt("Enter collection name:", `Collection #${vault.value.length + 1}`);
+                    if (!name) return;
+
+                    isSaving.value = true;
+                    try {
+                        const res = await fetch(`${API_BASE}/save_showcase`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ user_id: user.value.id, name, slots: slots.value })
+                        });
+                        if (res.ok) {
+                            alert("Saved successfully!");
+                            fetchVault();
+                        }
+                    } catch (e) { console.error(e); }
+                    finally { isSaving.value = false; }
+                };
+
+                const loadShowcase = (sc) => {
+                    slots.value = JSON.parse(JSON.stringify(sc.slots));
+                    activeTab.value = 'constructor';
+                };
+
+                const switchToVault = () => {
+                    activeTab.value = 'collections';
+                    fetchVault();
+                };
+
+                const uniqueGiftNames = computed(() => [...new Set(gifts.value.map(g => g.name.split(':')[0].trim()))]);
+                const filteredBaseGifts = computed(() => {
+                    const q = searchGifts.value.toLowerCase();
+                    return uniqueGiftNames.value.filter(name => name.toLowerCase().includes(q)).slice(0, 50);
+                });
+                const filteredModels = computed(() => {
+                    if (!tempSelection.value.baseGift) return [];
+                    const q = searchModels.value.toLowerCase();
+                    return gifts.value.filter(g => g.name.startsWith(tempSelection.value.baseGift) && g.name.toLowerCase().includes(q));
+                });
+                const filteredBackdrops = computed(() => {
+                    const q = searchBackdrops.value.toLowerCase();
+                    return commonBackdrops.value.filter(b => b.name.toLowerCase().includes(q));
+                });
                 
                 const getBgStyle = (bg) => {
                     if (!bg || !bg.center) return {};
@@ -287,34 +355,52 @@
                     const cur = slots.value[index];
                     tempSelection.value = {
                         baseGift: cur.model ? cur.model.name.split(':')[0].trim() : '',
-                        model: cur.model,
-                        backdrop: cur.backdrop
+                        model: cur.model ? JSON.parse(JSON.stringify(cur.model)) : null,
+                        backdrop: cur.backdrop ? JSON.parse(JSON.stringify(cur.backdrop)) : null
                     };
+                    searchGifts.value = ''; searchModels.value = ''; searchBackdrops.value = '';
                     pickerOpen.value = true;
                 };
 
-                const selectBase = (name) => {
-                    tempSelection.value.baseGift = name;
-                    tempSelection.value.model = null;
-                    tempSelection.value.backdrop = null;
-                };
-
-                const saveSelection = () => { slots.value[activeSlotIndex.value] = { ...tempSelection.value }; pickerOpen.value = false; };
+                const selectBase = (name) => { tempSelection.value.baseGift = name; tempSelection.value.model = null; searchGifts.value = ''; };
+                const saveSelection = () => { slots.value[activeSlotIndex.value] = JSON.parse(JSON.stringify(tempSelection.value)); pickerOpen.value = false; };
                 const resetSlot = () => { tempSelection.value = { baseGift: '', model: null, backdrop: null }; };
                 const addRow = () => slots.value.push(...Array(3).fill().map(() => ({ model: null, backdrop: null })));
                 const removeRow = () => { if (slots.value.length > 3) slots.value.splice(-3); };
+
+                const handleDragStart = (e, index) => { dragSourceIndex.value = index; e.dataTransfer.effectAllowed = 'move'; };
+                const handleDragOver = (e, index) => { dragOverIndex.value = index; };
+                const handleDragLeave = () => { dragOverIndex.value = null; };
+                const handleDrop = (e, targetIndex) => {
+                    const sourceIndex = dragSourceIndex.value;
+                    if (sourceIndex !== null && sourceIndex !== targetIndex) {
+                        const temp = slots.value[sourceIndex];
+                        slots.value[sourceIndex] = slots.value[targetIndex];
+                        slots.value[targetIndex] = temp;
+                    }
+                    dragSourceIndex.value = null; dragOverIndex.value = null;
+                };
 
                 onMounted(() => {
                     if (window.Telegram?.WebApp) {
                         const tg = window.Telegram.WebApp;
                         tg.ready(); tg.expand();
-                        user.value = tg.initDataUnsafe?.user || { first_name: 'Collector' };
-                        tg.setHeaderColor(tg.themeParams.secondary_bg_color || '#f4f4f7');
+                        if (tg.initDataUnsafe?.user) {
+                            user.value = { id: tg.initDataUnsafe.user.id, first_name: tg.initDataUnsafe.user.first_name };
+                        }
                     }
                     loadData();
+                    fetchVault();
                 });
 
-                return { user, loading, gifts, commonBackdrops, activeTab, slots, pickerOpen, tempSelection, uniqueGifts, filteredModels, getBgStyle, openPicker, saveSelection, selectBase, resetSlot, addRow, removeRow };
+                return { 
+                    user, gifts, commonBackdrops, activeTab, slots, vault, isSaving, pickerOpen, 
+                    tempSelection, searchGifts, searchModels, searchBackdrops,
+                    filteredBaseGifts, filteredModels, filteredBackdrops, dragOverIndex,
+                    getBgStyle, openPicker, saveSelection, selectBase, resetSlot, addRow, removeRow,
+                    handleDragStart, handleDragOver, handleDragLeave, handleDrop,
+                    saveShowcase, loadShowcase, switchToVault
+                };
             }
         }).mount('#app');
     </script>

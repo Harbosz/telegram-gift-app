@@ -1,0 +1,9 @@
+aiogram
+sentence-transformers
+numpy
+python-dotenv
+fastapi
+uvicorn
+telethon
+requests
+pydantic
