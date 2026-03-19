@@ -101,6 +101,63 @@
 
         .panel-content { padding: 24px; overflow-y: auto; flex: 1; }
 
+        .input-group { margin-bottom: 20px; }
+        .label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--hint);
+            margin-bottom: 8px;
+            margin-left: 4px;
+        }
+
+        .field {
+            width: 100%;
+            background: var(--input-bg);
+            border: none;
+            border-radius: 12px;
+            padding: 14px 16px;
+            font-size: 15px;
+            color: var(--text);
+            outline: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .btn-similar {
+            background: #2c2c2e;
+            color: #fff;
+            padding: 12px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 500;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+
+        .footer {
+            padding: 16px 24px;
+            display: flex;
+            gap: 12px;
+            border-top: 1px solid var(--border);
+            background: var(--bg);
+        }
+
+        .btn-footer {
+            flex: 1;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            text-align: center;
+            cursor: pointer;
+            background: #2c2c2e;
+            color: #fff;
+        }
+
         /* Navigation */
         .nav-bar {
             position: fixed;
@@ -118,7 +175,26 @@
         /* Dropdowns */
         .dropdown-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 110; display: flex; flex-direction: column; justify-content: flex-end; }
         .dropdown-menu { background: #1c1c1e; border-radius: 32px 32px 0 0; max-height: 80vh; overflow-y: auto; padding: 24px; }
-        .menu-item { padding: 18px; border-radius: 16px; font-size: 15px; cursor: pointer; display: flex; align-items: center; gap: 14px; }
+        .search-box {
+            background: #2c2c2e;
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 16px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        .search-box input { background: transparent; border: none; outline: none; color: #fff; flex: 1; font-size: 15px; }
+
+        .menu-item {
+            padding: 18px;
+            border-radius: 16px;
+            font-size: 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
         .menu-item:active { background: #2c2c2e; }
         .menu-item img { width: 40px; height: 40px; object-fit: contain; }
     </style>
@@ -220,14 +296,26 @@
                         <div class="field bg-[#242426] text-gray-500 cursor-default"><span>t.me/nft/BlingBinky-371</span></div>
                         <div class="btn-similar">Похожие</div>
                     </div>
-                    <div class="input-group"><label class="label">Подарок</label>
-                        <div class="field" @click="openMenu('base')"><span>{{ tempSelection.baseGift || 'Выберите подарок' }}</span><i class="fa-solid fa-caret-down text-gray-600"></i></div>
+                    <div class="input-group">
+                        <label class="label">Подарок</label>
+                        <div class="field" @click="openMenu('base')">
+                            <span>{{ tempSelection.baseGift || 'Выберите подарок' }}</span>
+                            <i class="fa-solid fa-caret-down text-gray-600"></i>
+                        </div>
                     </div>
-                    <div class="input-group" :class="{'opacity-30': !tempSelection.baseGift}"><label class="label">Модель</label>
-                        <div class="field" @click="tempSelection.baseGift && openMenu('model')"><span>{{ tempSelection.model ? tempSelection.model.name.split(':')[1] : 'Сначала выберите подарок' }}</span><i class="fa-solid fa-caret-down text-gray-600"></i></div>
+                    <div class="input-group" :class="{'opacity-30': !tempSelection.baseGift}">
+                        <label class="label">Модель</label>
+                        <div class="field" @click="tempSelection.baseGift && openMenu('model')">
+                            <span>{{ tempSelection.model ? tempSelection.model.name.split(':')[1] : 'Сначала выберите подарок' }}</span>
+                            <i class="fa-solid fa-caret-down text-gray-600"></i>
+                        </div>
                     </div>
-                    <div class="input-group"><label class="label">Фон</label>
-                        <div class="field" @click="openMenu('backdrop')"><span>{{ tempSelection.backdrop ? tempSelection.backdrop.name : 'Сначала выберите подарок' }}</span><i class="fa-solid fa-caret-down text-gray-600"></i></div>
+                    <div class="input-group">
+                        <label class="label">Фон</label>
+                        <div class="field" @click="openMenu('backdrop')">
+                            <span>{{ tempSelection.backdrop ? tempSelection.backdrop.name : 'Сначала выберите подарок' }}</span>
+                            <i class="fa-solid fa-caret-down text-gray-600"></i>
+                        </div>
                     </div>
                 </div>
                 <div class="footer">
@@ -239,10 +327,25 @@
             <!-- DROPDOWNS -->
             <div class="dropdown-overlay" v-if="currentMenu" @click="currentMenu = null">
                 <div class="dropdown-menu" @click.stop>
-                    <div class="search-box"><i class="fa-solid fa-magnifying-glass text-gray-600"></i><input type="text" v-model="menuSearch" placeholder="Поиск..."></div>
-                    <div v-if="currentMenu === 'base'"><div v-for="name in filteredBaseGifts" :key="name" @click="selectBase(name)" class="menu-item">{{ name }}</div></div>
-                    <div v-if="currentMenu === 'model'"><div v-for="m in filteredModels" :key="m.id" @click="tempSelection.model = m; currentMenu = null" class="menu-item"><img :src="m.image_url"><span>{{ m.name.split(':')[1] || m.name }}</span></div></div>
-                    <div v-if="currentMenu === 'backdrop'"><div v-for="b in filteredBackdrops" :key="b.name" @click="tempSelection.backdrop = b; currentMenu = null" class="menu-item"><div class="w-10 h-10 rounded-xl border border-white/5" :style="getBgStyle(b)"></div><span>{{ b.name }}</span></div></div>
+                    <div class="search-box">
+                        <i class="fa-solid fa-magnifying-glass text-gray-600"></i>
+                        <input type="text" v-model="menuSearch" placeholder="Поиск...">
+                    </div>
+                    <div v-if="currentMenu === 'base'">
+                        <div v-for="name in filteredBaseGifts" :key="name" @click="selectBase(name)" class="menu-item">{{ name }}</div>
+                    </div>
+                    <div v-if="currentMenu === 'model'">
+                        <div v-for="m in filteredModels" :key="m.id" @click="tempSelection.model = m; currentMenu = null" class="menu-item">
+                            <img :src="m.image_url">
+                            <span>{{ m.name.split(':')[1] || m.name }}</span>
+                        </div>
+                    </div>
+                    <div v-if="currentMenu === 'backdrop'">
+                        <div v-for="b in filteredBackdrops" :key="b.name" @click="tempSelection.backdrop = b; currentMenu = null" class="menu-item">
+                            <div class="w-10 h-10 rounded-xl border border-white/5" :style="getBgStyle(b)"></div>
+                            <span>{{ b.name }}</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -290,6 +393,13 @@
                     } catch (e) { console.error(e); }
                 };
 
+                const fetchVault = async () => {
+                    try {
+                        const res = await fetch(`${API_BASE}/get_showcases?user_id=${user.value.id}`);
+                        if (res.ok) vault.value = await res.json();
+                    } catch (e) { console.error(e); }
+                };
+
                 const curatedGifts = computed(() => {
                     if (!activeCurated.value) return [];
                     const names = activeCurated.value.models ? activeCurated.value.models.map(n => n.toLowerCase()) : [];
@@ -313,16 +423,25 @@
                     if (window.Telegram?.WebApp) Telegram.WebApp.HapticFeedback.notificationOccurred('success');
                 };
 
-                const openPicker = (index) => { activeSlotIndex.value = index; tempSelection.value = JSON.parse(JSON.stringify(slots.value[index])); pickerOpen.value = true; };
+                const openPicker = (index) => {
+                    activeSlotIndex.value = index;
+                    const cur = slots.value[index];
+                    tempSelection.value = JSON.parse(JSON.stringify(cur));
+                    pickerOpen.value = true;
+                };
+
                 const openMenu = (type) => { currentMenu.value = type; menuSearch.value = ''; };
+
                 const uniqueGiftNames = computed(() => [...new Set(gifts.value.map(g => g.name.split(':')[0].trim()))]);
                 const filteredBaseGifts = computed(() => uniqueGiftNames.value.filter(n => n.toLowerCase().includes(menuSearch.value.toLowerCase())).slice(0, 50));
                 const filteredModels = computed(() => gifts.value.filter(g => g.name.startsWith(tempSelection.value.baseGift) && g.name.toLowerCase().includes(menuSearch.value.toLowerCase())));
                 const filteredBackdrops = computed(() => commonBackdrops.value.filter(b => b.name.toLowerCase().includes(menuSearch.value.toLowerCase())));
+
                 const selectBase = (name) => { tempSelection.value.baseGift = name; tempSelection.value.model = null; currentMenu.value = null; };
                 const saveSelection = () => { slots.value[activeSlotIndex.value] = JSON.parse(JSON.stringify(tempSelection.value)); pickerOpen.value = false; };
                 const resetSlot = () => { tempSelection.value = { baseGift: '', model: null, backdrop: null }; };
                 const getBgStyle = (bg) => bg?.center ? { background: `radial-gradient(circle at 50% 50%, ${bg.center} 0%, ${bg.edge} 100%)` } : {};
+
                 const dragSourceIndex = ref(null);
                 const dragOverIndex = ref(null);
                 const handleDragStart = (e, i) => { dragSourceIndex.value = i; };
@@ -346,7 +465,16 @@
                     loadData();
                 });
 
-                return { user, gifts, commonBackdrops, activeTab, slots, vault, pickerOpen, tempSelection, currentMenu, menuSearch, filteredBaseGifts, filteredModels, filteredBackdrops, dragOverIndex, openPicker, openMenu, selectBase, saveSelection, resetSlot, getBgStyle, handleDragStart, handleDragOver, handleDragLeave, handleDrop, switchToVault: () => { activeTab.value = 'collections'; fetchVault(); }, loadShowcase: (sc) => { slots.value = JSON.parse(JSON.stringify(sc.slots)); activeTab.value = 'constructor'; }, activeCurated, curatedList, curatedGifts, applyCurated, fetchVault, saveShowcase: async () => { /* Logic */ } };
+                return { 
+                    user, gifts, commonBackdrops, activeTab, slots, vault, pickerOpen, tempSelection, 
+                    currentMenu, menuSearch, filteredBaseGifts, filteredModels, filteredBackdrops, 
+                    dragOverIndex, openPicker, openMenu, selectBase, saveSelection, resetSlot, 
+                    getBgStyle, handleDragStart, handleDragOver, handleDragLeave, handleDrop, 
+                    switchToVault: () => { activeTab.value = 'collections'; fetchVault(); }, 
+                    loadShowcase: (sc) => { slots.value = JSON.parse(JSON.stringify(sc.slots)); activeTab.value = 'constructor'; }, 
+                    activeCurated, curatedList, curatedGifts, applyCurated, fetchVault, 
+                    saveShowcase: async () => { /* Logic */ } 
+                };
             }
         }).mount('#app');
     </script>
