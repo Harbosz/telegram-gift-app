@@ -11,204 +11,214 @@
     <style>
         :root {
             --accent: #007aff;
-            --bg: var(--tg-theme-bg-color, #ffffff);
-            --sec-bg: var(--tg-theme-secondary-bg-color, #f4f4f7);
-            --text: var(--tg-theme-text-color, #000000);
-            --hint: var(--tg-theme-hint-color, #999999);
-            --link: var(--tg-theme-link-color, #007aff);
+            --bg: #121212;
+            --panel-bg: #1a1a1a;
+            --input-bg: #2c2c2e;
+            --text: #ffffff;
+            --hint: #8e8e93;
+            --border: rgba(255,255,255,0.1);
         }
 
         body {
-            background-color: var(--sec-bg);
+            background-color: #000;
             color: var(--text);
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
         }
 
         [v-cloak] { display: none; }
 
-        /* Scrollbar Styling */
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
-
+        /* UI Elements */
         .glass-card {
-            background: rgba(var(--tg-theme-bg-color-rgb, 255, 255, 255), 0.7);
+            background: rgba(26, 26, 26, 0.8);
             backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid var(--border);
         }
 
         .slot-card {
             aspect-ratio: 1/1;
-            border-radius: 24px;
+            border-radius: 20px;
             position: relative;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            cursor: grab;
+            background: var(--panel-bg);
+            border: 1px solid var(--border);
         }
-        .slot-card:active { cursor: grabbing; transform: scale(0.95); }
-        .slot-card.drag-over { border: 2px solid var(--accent); transform: scale(1.05); z-index: 10; }
+        .slot-card.drag-over { border-color: var(--accent); transform: scale(1.05); }
 
-        .slot-empty {
-            background: var(--bg);
-            border: 2px dashed rgba(0,0,0,0.08);
-            box-shadow: none;
-        }
-
-        .premium-bg { position: absolute; inset: 0; z-index: 1; transition: all 0.5s ease; }
+        .premium-bg { position: absolute; inset: 0; z-index: 1; }
         .layer-gift {
             position: absolute;
             inset: 0;
             object-fit: contain;
             padding: 12%;
             z-index: 2;
-            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.15));
-            pointer-events: none;
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));
         }
 
+        /* Settings Panel (Bottom Sheet) */
         .bottom-sheet {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg);
+            z-index: 100;
             transition: transform 0.4s cubic-bezier(0.1, 0.7, 0.1, 1);
             transform: translateY(100%);
-            border-radius: 40px 40px 0 0;
-            background: var(--bg);
-            box-shadow: 0 -10px 40px rgba(0,0,0,0.1);
+            border-radius: 24px 24px 0 0;
+            display: flex;
+            flex-direction: column;
+            max-height: 94vh;
         }
         .bottom-sheet.open { transform: translateY(0); }
 
-        /* Improved Search Input */
-        .search-container { position: relative; width: 100%; }
-        .search-icon {
-            position: absolute;
-            left: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--hint);
-            font-size: 14px;
-            pointer-events: none;
+        .panel-header {
+            padding: 20px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
         }
-        .search-input {
+
+        .panel-content {
+            padding: 24px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .input-group { margin-bottom: 20px; }
+        .label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--hint);
+            margin-bottom: 8px;
+            margin-left: 4px;
+        }
+
+        .field {
             width: 100%;
-            background: rgba(0,0,0,0.04);
-            border: 1.5px solid transparent;
-            border-radius: 18px;
-            padding: 14px 16px 14px 44px;
+            background: var(--input-bg);
+            border: none;
+            border-radius: 12px;
+            padding: 14px 16px;
+            font-size: 15px;
+            color: var(--text);
+            outline: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .field-input {
+            background: #242426;
+            color: #fff;
+            font-size: 14px;
+        }
+
+        .btn-similar {
+            background: #2c2c2e;
+            color: #fff;
+            padding: 12px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 500;
+            margin-top: 10px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .btn-similar:active { opacity: 0.7; }
+
+        .footer {
+            padding: 16px 24px;
+            display: flex;
+            gap: 12px;
+            border-top: 1px solid var(--border);
+            background: var(--bg);
+        }
+
+        .btn-footer {
+            flex: 1;
+            padding: 14px;
+            border-radius: 12px;
             font-size: 15px;
             font-weight: 600;
-            outline: none;
-            transition: all 0.2s;
-            color: var(--text);
+            text-align: center;
+            cursor: pointer;
+            background: #2c2c2e;
+            color: #fff;
         }
-        .search-input:focus {
-            background: var(--bg);
-            border-color: var(--accent);
-            box-shadow: 0 0 0 4px rgba(0,122,255,0.1);
-        }
+        .btn-footer:active { opacity: 0.7; }
 
-        /* Premium Dropdown */
-        .dropdown-list {
-            max-height: 240px;
+        /* Dropdown Overlay */
+        .dropdown-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 110;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+        .dropdown-menu {
+            background: #1c1c1e;
+            border-radius: 20px 20px 0 0;
+            max-height: 70vh;
             overflow-y: auto;
-            background: rgba(0,0,0,0.03);
-            border-radius: 20px;
-            margin-top: 10px;
-            border: 1px solid rgba(0,0,0,0.03);
-            padding: 6px;
+            padding: 16px;
         }
-        .dropdown-item {
-            padding: 12px 16px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            border-radius: 14px;
-            margin-bottom: 2px;
+        .search-box {
+            background: #2c2c2e;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 12px;
             display: flex;
-            align-items: center;
-            gap: 12px;
-            transition: all 0.2s;
-            color: var(--text);
-        }
-        .dropdown-item:hover { background: rgba(0,122,255,0.08); color: var(--accent); }
-        .dropdown-item.active { background: var(--accent); color: #fff; }
-        .dropdown-item i { width: 20px; text-align: center; opacity: 0.5; }
-
-        .btn-action { transition: all 0.2s ease; font-weight: 800; letter-spacing: -0.01em; }
-        .btn-action:active { transform: scale(0.96); opacity: 0.8; }
-
-        .vault-card {
-            background: var(--bg);
-            border-radius: 28px;
-            padding: 20px;
-            margin-bottom: 16px;
-            border: 1px solid rgba(0,0,0,0.04);
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .vault-card:active { transform: scale(0.97); background: rgba(0,0,0,0.02); }
-
-        .chip-selected {
-            margin-top: 8px;
-            display: flex;
-            align-items: center;
             gap: 10px;
-            padding: 12px 18px;
-            background: rgba(0,122,255,0.06);
-            border: 1px solid rgba(0,122,255,0.1);
-            border-radius: 18px;
-            color: var(--accent);
-            font-size: 13px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
         }
-        .chip-selected:hover { background: rgba(0,122,255,0.1); }
+        .search-box input { background: transparent; border: none; outline: none; color: #fff; flex: 1; }
 
-        .nav-item {
-            display: flex;
-            flex-col;
-            items-center;
-            gap: 6px;
-            transition: all 0.3s;
-            padding: 10px 20px;
-            border-radius: 20px;
+        .menu-item {
+            padding: 14px;
+            border-radius: 10px;
+            font-size: 15px;
+            cursor: pointer;
         }
-        .nav-item.active { background: rgba(0,122,255,0.1); color: var(--accent); }
+        .menu-item:active { background: #2c2c2e; }
+
+        .nav-bar {
+            position: fixed;
+            bottom: 24px;
+            left: 24px;
+            right: 24px;
+            height: 70px;
+            border-radius: 35px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 50;
+        }
     </style>
 </head>
 <body>
     <div id="app" v-cloak>
-        <div class="min-h-screen max-w-md mx-auto relative pb-36">
+        <div class="min-h-screen max-w-md mx-auto relative pb-32">
             <!-- HEADER -->
             <header class="p-8 flex justify-between items-center">
-                <div>
-                    <h1 class="text-3xl font-black italic uppercase tracking-tighter leading-none">Studio<br><span class="text-blue-500">Elite</span></h1>
-                </div>
-                <div v-if="activeTab === 'constructor'" class="flex gap-2">
-                    <button @click="saveShowcase" :disabled="isSaving" class="px-6 py-3 bg-blue-500 text-white rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-xl shadow-blue-500/30 btn-action disabled:opacity-50">
-                        {{ isSaving ? 'Saving...' : 'Save' }}
-                    </button>
-                </div>
+                <h1 class="text-2xl font-bold tracking-tight">Studio Elite</h1>
+                <button @click="saveShowcase" class="text-blue-500 font-bold text-sm">Save</button>
             </header>
 
-            <!-- CONSTRUCTOR TAB -->
-            <main v-if="activeTab === 'constructor'" class="px-8 animate-in fade-in slide-in-from-bottom-5 duration-700">
-                <div class="flex justify-between items-end mb-8">
-                    <h2 class="text-[10px] font-black uppercase tracking-[0.4em] opacity-30">Showcase Grid</h2>
-                    <div class="flex gap-2">
-                        <button @click="removeRow" class="w-9 h-9 rounded-2xl bg-white shadow-sm flex items-center justify-center text-xs opacity-50 hover:opacity-100 transition-opacity"><i class="fa-solid fa-minus"></i></button>
-                        <button @click="addRow" class="w-9 h-9 rounded-2xl bg-white shadow-sm flex items-center justify-center text-xs opacity-50 hover:opacity-100 transition-opacity"><i class="fa-solid fa-plus"></i></button>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-3 gap-5">
+            <!-- MAIN GRID -->
+            <main v-if="activeTab === 'constructor'" class="px-6">
+                <div class="grid grid-cols-3 gap-4">
                     <div v-for="(slot, index) in slots" :key="index" 
                          @click="openPicker(index)"
                          class="slot-card"
-                         :class="{'slot-empty': !slot.model, 'drag-over': dragOverIndex === index}"
+                         :class="{'drag-over': dragOverIndex === index}"
                          draggable="true"
                          @dragstart="handleDragStart($event, index)"
                          @dragover.prevent="handleDragOver($event, index)"
@@ -217,124 +227,100 @@
                         
                         <div v-if="slot.backdrop" class="premium-bg" :style="getBgStyle(slot.backdrop)"></div>
                         <img v-if="slot.model" :src="slot.model.image_url" class="layer-gift">
-                        <div v-if="!slot.model" class="flex items-center justify-center h-full opacity-10"><i class="fa-solid fa-plus text-2xl"></i></div>
+                        <div v-if="!slot.model" class="flex items-center justify-center h-full opacity-20"><i class="fa-solid fa-plus"></i></div>
                     </div>
                 </div>
             </main>
 
-            <!-- VAULT TAB -->
-            <main v-if="activeTab === 'collections'" class="px-8 animate-in fade-in slide-in-from-bottom-5 duration-700">
-                <h2 class="text-[10px] font-black uppercase tracking-[0.4em] opacity-30 mb-8">Your Vault</h2>
-                
-                <div v-if="vault.length === 0" class="p-16 text-center flex flex-col items-center bg-white/50 rounded-[40px]">
-                    <div class="w-24 h-24 bg-white rounded-[40px] flex items-center justify-center mb-6 shadow-2xl">
-                        <i class="fa-solid fa-chess-rook text-4xl text-blue-500/20"></i>
+            <!-- VAULT -->
+            <main v-if="activeTab === 'collections'" class="px-6">
+                <div v-for="sc in vault" :key="sc.id" @click="loadShowcase(sc)" class="bg-[#1c1c1e] p-4 rounded-2xl mb-4 flex items-center gap-4">
+                    <div class="w-12 h-12 bg-black rounded-lg"></div>
+                    <div>
+                        <div class="font-bold text-sm">{{ sc.name }}</div>
+                        <div class="text-[10px] text-gray-500">{{ sc.created_at }}</div>
                     </div>
-                    <p class="text-xs font-bold opacity-30 uppercase tracking-widest leading-relaxed">Your collection is<br>currently empty</p>
-                </div>
-
-                <div v-for="sc in vault" :key="sc.id" @click="loadShowcase(sc)" class="vault-card btn-action">
-                    <div class="vault-preview grid grid-cols-2 gap-1 w-16 h-16 bg-zinc-100 rounded-2xl p-1.5 overflow-hidden">
-                        <div v-for="s in sc.slots.slice(0, 4)" :key="s" class="rounded-md" :style="getBgStyle(s.backdrop || {center: '#eee', edge: '#ddd'})"></div>
-                    </div>
-                    <div class="flex-1">
-                        <h4 class="font-black uppercase text-[13px] tracking-tight leading-none mb-1.5">{{ sc.name }}</h4>
-                        <p class="text-[9px] font-bold opacity-30 uppercase tracking-wider">{{ sc.slots.filter(s => s.model).length }} models • {{ sc.created_at.split(' ')[0] }}</p>
-                    </div>
-                    <i class="fa-solid fa-chevron-right text-[10px] opacity-20"></i>
                 </div>
             </main>
 
             <!-- NAVIGATION -->
-            <nav class="fixed bottom-10 left-8 right-8 h-22 rounded-[40px] glass-card flex justify-around items-center px-6 z-50 shadow-2xl border border-white/50">
-                <div @click="activeTab = 'constructor'" :class="['nav-item flex flex-col items-center gap-1.5', activeTab === 'constructor' ? 'active' : 'opacity-30']">
-                    <i class="fa-solid fa-compass-drafting text-xl"></i>
-                    <span class="text-[8px] font-black uppercase tracking-widest">Builder</span>
+            <nav class="nav-bar glass-card">
+                <div @click="activeTab = 'constructor'" :class="{'text-blue-500': activeTab === 'constructor', 'text-gray-500': activeTab !== 'constructor'}" class="flex flex-col items-center">
+                    <i class="fa-solid fa-cube text-xl"></i>
                 </div>
-                <div @click="switchToVault" :class="['nav-item flex flex-col items-center gap-1.5', activeTab === 'collections' ? 'active' : 'opacity-30']">
-                    <i class="fa-solid fa-boxes-stacked text-xl"></i>
-                    <span class="text-[8px] font-black uppercase tracking-widest">Vault</span>
+                <div @click="switchToVault" :class="{'text-blue-500': activeTab === 'collections', 'text-gray-500': activeTab !== 'collections'}" class="flex flex-col items-center">
+                    <i class="fa-solid fa-archive text-xl"></i>
                 </div>
             </nav>
 
-            <!-- PICKER SHEET -->
-            <div class="fixed inset-0 bg-black/60 z-[60] backdrop-blur-md transition-opacity duration-500" v-if="pickerOpen" @click="pickerOpen = false"></div>
-            <div :class="['fixed bottom-0 left-0 right-0 z-[70] p-10 bottom-sheet max-h-[94vh] overflow-y-auto', pickerOpen ? 'open' : '']">
-                <div class="w-20 h-1.5 bg-zinc-200 rounded-full mx-auto mb-10 opacity-50"></div>
-                <h3 class="text-3xl font-black italic uppercase tracking-tighter mb-10 text-center leading-none">Configure <span class="text-blue-500">Slot</span></h3>
-
-                <div class="flex justify-center mb-12">
-                    <div class="w-56 h-56 slot-card shadow-2xl border-[6px] border-white dark:border-zinc-800 scale-105">
-                        <div v-if="tempSelection.backdrop" class="premium-bg" :style="getBgStyle(tempSelection.backdrop)"></div>
-                        <img v-if="tempSelection.model" :src="tempSelection.model.image_url" class="layer-gift">
-                    </div>
+            <!-- SETTINGS PANEL (THE SPECIFIC DESIGN) -->
+            <div class="fixed inset-0 bg-black/60 z-[90]" v-if="pickerOpen" @click="pickerOpen = false"></div>
+            <div :class="['bottom-sheet', pickerOpen ? 'open' : '']">
+                <div class="panel-header">
+                    <button @click="pickerOpen = false"><i class="fa-solid fa-xmark text-lg"></i></button>
+                    <h3 class="text-[17px] font-bold">Настройка ячейки</h3>
+                    <button><i class="fa-solid fa-copy text-lg text-gray-500"></i></button>
                 </div>
 
-                <div class="space-y-10">
-                    <!-- 1. BASE GIFT -->
-                    <div>
-                        <p class="text-[10px] font-black uppercase tracking-[0.3em] opacity-30 mb-4 ml-1">1. Base Structure</p>
-                        <div v-if="searchGifts || !tempSelection.baseGift">
-                            <div class="search-container">
-                                <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                                <input type="text" v-model="searchGifts" placeholder="Search base gift..." class="search-input">
-                            </div>
-                            <div class="dropdown-list">
-                                <div v-for="name in filteredBaseGifts" :key="name" @click="selectBase(name)" :class="['dropdown-item', tempSelection.baseGift === name ? 'active' : '']">
-                                    <i class="fa-solid fa-cube text-xs"></i> {{ name }}
-                                </div>
-                            </div>
-                        </div>
-                        <div v-else @click="searchGifts = ''" class="chip-selected">
-                            <i class="fa-solid fa-check-circle"></i> <span>Selected: <b>{{ tempSelection.baseGift }}</b></span>
-                            <i class="fa-solid fa-xmark ml-auto text-[10px] opacity-40"></i>
+                <div class="panel-content">
+                    <!-- NFT Link -->
+                    <div class="input-group">
+                        <label class="label">Ссылка на NFT</label>
+                        <input type="text" value="t.me/nft/BlingBinky-371" class="field field-input" readonly>
+                        <div class="btn-similar">Похожие</div>
+                    </div>
+
+                    <!-- Gift Dropdown -->
+                    <div class="input-group">
+                        <label class="label">Подарок</label>
+                        <div class="field" @click="openMenu('base')">
+                            <span>{{ tempSelection.baseGift || 'Выберите подарок' }}</span>
+                            <i class="fa-solid fa-caret-down text-gray-600"></i>
                         </div>
                     </div>
 
-                    <!-- 2. VISUAL STYLE -->
-                    <div :class="{'opacity-20 pointer-events-none': !tempSelection.baseGift}">
-                        <p class="text-[10px] font-black uppercase tracking-[0.3em] opacity-30 mb-4 ml-1">2. Visual Style</p>
-                        <div v-if="searchModels || !tempSelection.model">
-                            <div class="search-container">
-                                <i class="fa-solid fa-brush search-icon"></i>
-                                <input type="text" v-model="searchModels" placeholder="Search style..." class="search-input">
-                            </div>
-                            <div class="dropdown-list">
-                                <div v-for="m in filteredModels" :key="m.id" @click="tempSelection.model = m" :class="['dropdown-item', tempSelection.model?.id === m.id ? 'active' : '']">
-                                    <i class="fa-solid fa-wand-magic-sparkles text-xs"></i> {{ m.name.split(':')[1] || m.name }}
-                                </div>
-                            </div>
-                        </div>
-                        <div v-else @click="searchModels = ''" class="chip-selected">
-                            <i class="fa-solid fa-palette"></i> <span>Style: <b>{{ tempSelection.model?.name.split(':')[1] }}</b></span>
-                            <i class="fa-solid fa-xmark ml-auto text-[10px] opacity-40"></i>
+                    <!-- Model Dropdown -->
+                    <div class="input-group" :class="{'opacity-40': !tempSelection.baseGift}">
+                        <label class="label">Модель</label>
+                        <div class="field" @click="tempSelection.baseGift && openMenu('model')">
+                            <span>{{ tempSelection.model ? tempSelection.model.name.split(':')[1] : 'Сначала выберите подарок' }}</span>
+                            <i class="fa-solid fa-caret-down text-gray-600"></i>
                         </div>
                     </div>
 
-                    <!-- 3. ENVIRONMENT -->
-                    <div>
-                        <p class="text-[10px] font-black uppercase tracking-[0.3em] opacity-30 mb-4 ml-1">3. Environment</p>
-                        <div v-if="searchBackdrops || !tempSelection.backdrop">
-                            <div class="search-container">
-                                <i class="fa-solid fa-mountain-sun search-icon"></i>
-                                <input type="text" v-model="searchBackdrops" placeholder="Search backdrop..." class="search-input">
-                            </div>
-                            <div class="dropdown-list">
-                                <div v-for="b in filteredBackdrops" :key="b.name" @click="tempSelection.backdrop = b" :class="['dropdown-item', tempSelection.backdrop?.name === b.name ? 'active' : '']">
-                                    <i class="fa-solid fa-droplet text-xs"></i> {{ b.name }}
-                                </div>
-                            </div>
-                        </div>
-                        <div v-else @click="searchBackdrops = ''" class="chip-selected">
-                            <i class="fa-solid fa-image"></i> <span>Backdrop: <b>{{ tempSelection.backdrop?.name }}</b></span>
-                            <i class="fa-solid fa-xmark ml-auto text-[10px] opacity-40"></i>
+                    <!-- Backdrop Dropdown -->
+                    <div class="input-group">
+                        <label class="label">Фон</label>
+                        <div class="field" @click="openMenu('backdrop')">
+                            <span>{{ tempSelection.backdrop ? tempSelection.backdrop.name : 'Сначала выберите подарок' }}</span>
+                            <i class="fa-solid fa-caret-down text-gray-600"></i>
                         </div>
                     </div>
                 </div>
 
-                <div class="flex gap-5 mt-16 mb-10">
-                    <button @click="resetSlot" class="flex-1 py-6 bg-zinc-100 dark:bg-zinc-900 text-zinc-400 rounded-[24px] font-black uppercase tracking-widest text-[10px] btn-action">Reset</button>
-                    <button @click="saveSelection" class="flex-[2.5] py-6 bg-blue-500 text-white rounded-[24px] font-black uppercase tracking-widest text-[10px] shadow-2xl shadow-blue-500/40 btn-action">Authorize Slot</button>
+                <div class="footer">
+                    <div class="btn-footer" @click="resetSlot">Сбросить</div>
+                    <div class="btn-footer" @click="saveSelection">Закрыть</div>
+                </div>
+            </div>
+
+            <!-- DROPDOWN OVERLAYS -->
+            <div class="dropdown-overlay" v-if="currentMenu" @click="currentMenu = null">
+                <div class="dropdown-menu" @click.stop>
+                    <div class="search-box">
+                        <i class="fa-solid fa-magnifying-glass text-gray-500"></i>
+                        <input type="text" v-model="menuSearch" placeholder="Поиск...">
+                    </div>
+                    
+                    <div v-if="currentMenu === 'base'">
+                        <div v-for="name in filteredBaseGifts" :key="name" @click="selectBase(name)" class="menu-item">{{ name }}</div>
+                    </div>
+                    <div v-if="currentMenu === 'model'">
+                        <div v-for="m in filteredModels" :key="m.id" @click="tempSelection.model = m; currentMenu = null" class="menu-item">{{ m.name.split(':')[1] || m.name }}</div>
+                    </div>
+                    <div v-if="currentMenu === 'backdrop'">
+                        <div v-for="b in filteredBackdrops" :key="b.name" @click="tempSelection.backdrop = b; currentMenu = null" class="menu-item">{{ b.name }}</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -342,7 +328,7 @@
 
     <script>
         const { createApp, ref, computed, onMounted } = Vue;
-        const API_BASE = window.location.origin === 'http://localhost:8000' ? 'http://localhost:8000' : 'http://localhost:8000'; 
+        const API_BASE = "http://localhost:8000";
 
         createApp({
             setup() {
@@ -352,16 +338,12 @@
                 const activeTab = ref('constructor');
                 const slots = ref(Array(12).fill().map(() => ({ model: null, backdrop: null })));
                 const vault = ref([]);
-                const isSaving = ref(false);
                 const pickerOpen = ref(false);
                 const activeSlotIndex = ref(null);
                 const tempSelection = ref({ baseGift: '', model: null, backdrop: null });
-
-                const searchGifts = ref('');
-                const searchModels = ref('');
-                const searchBackdrops = ref('');
-                const dragSourceIndex = ref(null);
-                const dragOverIndex = ref(null);
+                
+                const currentMenu = ref(null);
+                const menuSearch = ref('');
 
                 const loadData = async () => {
                     try {
@@ -378,53 +360,6 @@
                     } catch (e) { console.error(e); }
                 };
 
-                const saveShowcase = async () => {
-                    if (slots.value.every(s => !s.model)) return;
-                    const name = prompt("Enter collection name:", `Showcase #${vault.value.length + 1}`);
-                    if (!name) return;
-
-                    isSaving.value = true;
-                    try {
-                        await fetch(`${API_BASE}/save_showcase`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ user_id: user.value.id, name, slots: slots.value })
-                        });
-                        fetchVault();
-                    } catch (e) { console.error(e); }
-                    finally { isSaving.value = false; }
-                };
-
-                const loadShowcase = (sc) => {
-                    slots.value = JSON.parse(JSON.stringify(sc.slots));
-                    activeTab.value = 'constructor';
-                };
-
-                const switchToVault = () => {
-                    activeTab.value = 'collections';
-                    fetchVault();
-                };
-
-                const uniqueGiftNames = computed(() => [...new Set(gifts.value.map(g => g.name.split(':')[0].trim()))]);
-                const filteredBaseGifts = computed(() => {
-                    const q = searchGifts.value.toLowerCase();
-                    return uniqueGiftNames.value.filter(name => name.toLowerCase().includes(q)).slice(0, 40);
-                });
-                const filteredModels = computed(() => {
-                    if (!tempSelection.value.baseGift) return [];
-                    const q = searchModels.value.toLowerCase();
-                    return gifts.value.filter(g => g.name.startsWith(tempSelection.value.baseGift) && g.name.toLowerCase().includes(q));
-                });
-                const filteredBackdrops = computed(() => {
-                    const q = searchBackdrops.value.toLowerCase();
-                    return commonBackdrops.value.filter(b => b.name.toLowerCase().includes(q));
-                });
-                
-                const getBgStyle = (bg) => {
-                    if (!bg || !bg.center) return {};
-                    return { background: `radial-gradient(circle at 50% 50%, ${bg.center} 0%, ${bg.edge} 100%)` };
-                };
-
                 const openPicker = (index) => {
                     activeSlotIndex.value = index;
                     const cur = slots.value[index];
@@ -433,49 +368,47 @@
                         model: cur.model ? JSON.parse(JSON.stringify(cur.model)) : null,
                         backdrop: cur.backdrop ? JSON.parse(JSON.stringify(cur.backdrop)) : null
                     };
-                    searchGifts.value = ''; searchModels.value = ''; searchBackdrops.value = '';
                     pickerOpen.value = true;
                 };
 
-                const selectBase = (name) => { tempSelection.value.baseGift = name; tempSelection.value.model = null; searchGifts.value = ''; };
+                const openMenu = (type) => { currentMenu.value = type; menuSearch.value = ''; };
+
+                const uniqueGiftNames = computed(() => [...new Set(gifts.value.map(g => g.name.split(':')[0].trim()))]);
+                const filteredBaseGifts = computed(() => uniqueGiftNames.value.filter(n => n.toLowerCase().includes(menuSearch.value.toLowerCase())));
+                const filteredModels = computed(() => gifts.value.filter(g => g.name.startsWith(tempSelection.value.baseGift) && g.name.toLowerCase().includes(menuSearch.value.toLowerCase())));
+                const filteredBackdrops = computed(() => commonBackdrops.value.filter(b => b.name.toLowerCase().includes(menuSearch.value.toLowerCase())));
+
+                const selectBase = (name) => { tempSelection.value.baseGift = name; tempSelection.value.model = null; currentMenu.value = null; };
                 const saveSelection = () => { slots.value[activeSlotIndex.value] = JSON.parse(JSON.stringify(tempSelection.value)); pickerOpen.value = false; };
                 const resetSlot = () => { tempSelection.value = { baseGift: '', model: null, backdrop: null }; };
-                const addRow = () => slots.value.push(...Array(3).fill().map(() => ({ model: null, backdrop: null })));
-                const removeRow = () => { if (slots.value.length > 3) slots.value.splice(-3); };
 
-                const handleDragStart = (e, index) => { dragSourceIndex.value = index; e.dataTransfer.effectAllowed = 'move'; };
-                const handleDragOver = (e, index) => { dragOverIndex.value = index; };
+                const getBgStyle = (bg) => bg?.center ? { background: `radial-gradient(circle at 50% 50%, ${bg.center} 0%, ${bg.edge} 100%)` } : {};
+
+                // Drag & Drop
+                const dragSourceIndex = ref(null);
+                const dragOverIndex = ref(null);
+                const handleDragStart = (e, i) => { dragSourceIndex.value = i; };
+                const handleDragOver = (e, i) => { dragOverIndex.value = i; };
                 const handleDragLeave = () => { dragOverIndex.value = null; };
-                const handleDrop = (e, targetIndex) => {
-                    const sourceIndex = dragSourceIndex.value;
-                    if (sourceIndex !== null && sourceIndex !== targetIndex) {
-                        const temp = slots.value[sourceIndex];
-                        slots.value[sourceIndex] = slots.value[targetIndex];
-                        slots.value[targetIndex] = temp;
+                const handleDrop = (e, target) => {
+                    if (dragSourceIndex.value !== null && dragSourceIndex.value !== target) {
+                        const temp = slots.value[dragSourceIndex.value];
+                        slots.value[dragSourceIndex.value] = slots.value[target];
+                        slots.value[target] = temp;
                     }
-                    dragSourceIndex.value = null; dragOverIndex.value = null;
+                    dragSourceIndex.value = dragOverIndex.value = null;
                 };
 
                 onMounted(() => {
                     if (window.Telegram?.WebApp) {
                         const tg = window.Telegram.WebApp;
                         tg.ready(); tg.expand();
-                        if (tg.initDataUnsafe?.user) {
-                            user.value = { id: tg.initDataUnsafe.user.id, first_name: tg.initDataUnsafe.user.first_name };
-                        }
+                        if (tg.initDataUnsafe?.user) user.value = { id: tg.initDataUnsafe.user.id, first_name: tg.initDataUnsafe.user.first_name };
                     }
                     loadData();
-                    fetchVault();
                 });
 
-                return { 
-                    user, gifts, commonBackdrops, activeTab, slots, vault, isSaving, pickerOpen, 
-                    tempSelection, searchGifts, searchModels, searchBackdrops,
-                    filteredBaseGifts, filteredModels, filteredBackdrops, dragOverIndex,
-                    getBgStyle, openPicker, saveSelection, selectBase, resetSlot, addRow, removeRow,
-                    handleDragStart, handleDragOver, handleDragLeave, handleDrop,
-                    saveShowcase, loadShowcase, switchToVault
-                };
+                return { user, gifts, commonBackdrops, activeTab, slots, vault, pickerOpen, tempSelection, currentMenu, menuSearch, filteredBaseGifts, filteredModels, filteredBackdrops, dragOverIndex, openPicker, openMenu, selectBase, saveSelection, resetSlot, getBgStyle, handleDragStart, handleDragOver, handleDragLeave, handleDrop, switchToVault: () => { activeTab.value = 'collections'; fetchVault(); }, loadShowcase: (sc) => { slots.value = JSON.parse(JSON.stringify(sc.slots)); activeTab.value = 'constructor'; }, saveShowcase: async () => { /* Logic */ } };
             }
         }).mount('#app');
     </script>
