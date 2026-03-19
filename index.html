@@ -9,48 +9,266 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --accent: #007aff; --bg: #121212; --panel-bg: #1a1a1a; --input-bg: #2c2c2e; --text: #ffffff; --hint: #8e8e93; --border: rgba(255,255,255,0.08); }
-        body { background-color: #000; color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+        :root {
+            --accent: #007aff;
+            --accent-glow: rgba(0, 122, 255, 0.4);
+            --bg-dark: #000000;
+            --glass-bg: rgba(28, 28, 30, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --text-primary: #ffffff;
+            --text-secondary: #8e8e93;
+            --card-surface: #1c1c1e;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Cinematic Background */
+        .cinematic-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 0% 0%, #1a1a2e 0%, transparent 50%),
+                radial-gradient(circle at 100% 100%, #000000 0%, transparent 50%),
+                radial-gradient(circle at 100% 0%, #0f0f1a 0%, transparent 50%);
+            z-index: -1;
+        }
+
         [v-cloak] { display: none; }
-        .glass-card { background: rgba(26, 26, 26, 0.92); backdrop-filter: blur(25px); border: 1px solid var(--border); }
-        .slot-card { aspect-ratio: 1/1; border-radius: 20px; position: relative; transition: all 0.3s ease; overflow: hidden; background: var(--panel-bg); border: 1px solid var(--border); }
-        .premium-bg { position: absolute; inset: 0; z-index: 1; }
-        .layer-gift { position: absolute; inset: 0; object-fit: contain; padding: 12%; z-index: 2; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.6)); pointer-events: none; }
-        .curated-card { background: var(--panel-bg); border-radius: 24px; padding: 22px 24px; border: 1px solid var(--border); cursor: pointer; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; transition: all 0.2s; }
-        .curated-card:active { transform: scale(0.97); background: #222; }
-        .curated-title { font-size: 16px; font-weight: 800; }
-        .curated-tag { font-size: 8px; font-weight: 900; text-transform: uppercase; padding: 4px 10px; border-radius: 8px; background: rgba(255,255,255,0.04); color: var(--hint); }
-        .bottom-sheet { position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg); z-index: 100; transition: transform 0.4s cubic-bezier(0.1, 0.7, 0.1, 1); transform: translateY(100%); border-radius: 32px 32px 0 0; display: flex; flex-direction: column; max-height: 94vh; }
+
+        /* Glassmorphism Utilities */
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        /* Slot Card */
+        .slot-card {
+            aspect-ratio: 1/1;
+            border-radius: 24px;
+            position: relative;
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+        }
+        
+        .slot-card:active {
+            transform: scale(0.96);
+            border-color: var(--accent);
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        .premium-bg { position: absolute; inset: 0; z-index: 1; transition: opacity 0.3s; }
+        
+        .layer-gift { 
+            position: absolute; 
+            inset: 0; 
+            object-fit: contain; 
+            padding: 14%; 
+            z-index: 2; 
+            filter: drop-shadow(0 12px 24px rgba(0,0,0,0.6)); 
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .slot-card:active .layer-gift { transform: scale(1.1); }
+
+        .add-icon {
+            color: rgba(255,255,255,0.2);
+            transition: color 0.3s;
+        }
+        .slot-card:active .add-icon { color: var(--accent); }
+
+        /* Curated Collections */
+        .curated-card {
+            background: linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
+            border-radius: 24px;
+            padding: 20px 24px;
+            border: 1px solid var(--glass-border);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            transition: transform 0.2s, background 0.3s;
+        }
+        
+        .curated-card:active { transform: scale(0.98); background: rgba(255,255,255,0.08); }
+        
+        .curated-title { font-size: 17px; font-weight: 700; letter-spacing: -0.02em; }
+        
+        .curated-tag { 
+            font-size: 10px; 
+            font-weight: 800; 
+            text-transform: uppercase; 
+            padding: 6px 12px; 
+            border-radius: 12px; 
+            background: rgba(255,255,255,0.1); 
+            color: rgba(255,255,255,0.8);
+            letter-spacing: 0.05em;
+        }
+
+        /* Bottom Sheet */
+        .bottom-sheet {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background: #121212;
+            z-index: 100;
+            transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+            transform: translateY(100%);
+            border-radius: 36px 36px 0 0;
+            display: flex;
+            flex-direction: column;
+            max-height: 90vh;
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
+            border-top: 1px solid var(--glass-border);
+        }
+        
         .bottom-sheet.open { transform: translateY(0); }
-        .panel-header { padding: 24px 28px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
-        .panel-content { padding: 28px; overflow-y: auto; flex: 1; }
-        .label { display: block; font-size: 12px; font-weight: 700; color: var(--hint); margin-bottom: 10px; text-transform: uppercase; }
-        .field { width: 100%; background: var(--input-bg); border-radius: 14px; padding: 16px 18px; font-size: 15px; color: var(--text); display: flex; justify-content: space-between; align-items: center; cursor: pointer; margin-bottom: 20px; }
-        .btn-similar { background: #2c2c2e; color: #fff; padding: 14px; border-radius: 14px; text-align: center; font-size: 14px; font-weight: 700; margin-top: 12px; cursor: pointer; }
-        .footer { padding: 20px 28px; display: flex; gap: 14px; border-top: 1px solid var(--border); }
-        .btn-footer { flex: 1; padding: 16px; border-radius: 14px; font-size: 14px; font-weight: 800; text-align: center; cursor: pointer; background: #2c2c2e; color: #fff; }
-        .nav-bar { position: fixed; bottom: 28px; left: 28px; right: 28px; height: 76px; border-radius: 38px; display: flex; justify-content: space-around; align-items: center; z-index: 50; border: 1px solid rgba(255,255,255,0.04); }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; color: #444; }
+        
+        .panel-header {
+            padding: 24px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .panel-content { padding: 0 32px 40px 32px; overflow-y: auto; flex: 1; }
+        
+        .label { 
+            display: block; 
+            font-size: 11px; 
+            font-weight: 700; 
+            color: var(--text-secondary); 
+            margin-bottom: 8px; 
+            text-transform: uppercase; 
+            letter-spacing: 0.05em;
+        }
+        
+        .field { 
+            width: 100%; 
+            background: rgba(255,255,255,0.06); 
+            border-radius: 16px; 
+            padding: 18px 20px; 
+            font-size: 16px; 
+            color: var(--text-primary); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            cursor: pointer; 
+            margin-bottom: 24px; 
+            border: 1px solid transparent;
+            transition: all 0.2s;
+        }
+        
+        .field:active { background: rgba(255,255,255,0.1); transform: scale(0.99); }
+
+        .btn-similar { 
+            background: rgba(255,255,255,0.06); 
+            color: var(--text-primary); 
+            padding: 16px; 
+            border-radius: 16px; 
+            text-align: center; 
+            font-size: 15px; 
+            font-weight: 600; 
+            margin-top: 16px; 
+            cursor: pointer;
+        }
+
+        .footer { 
+            padding: 24px 32px 40px 32px; 
+            display: flex; 
+            gap: 16px; 
+            background: linear-gradient(to top, #121212 80%, transparent 100%);
+        }
+        
+        .btn-footer { 
+            flex: 1; 
+            padding: 18px; 
+            border-radius: 18px; 
+            font-size: 16px; 
+            font-weight: 700; 
+            text-align: center; 
+            cursor: pointer; 
+            background: #2c2c2e; 
+            color: #fff;
+            transition: transform 0.2s;
+        }
+        
+        .btn-footer:active { transform: scale(0.96); }
+        .btn-footer.primary { background: var(--accent); }
+
+        /* Navigation */
+        .nav-bar {
+            position: fixed;
+            bottom: 32px; left: 24px; right: 24px;
+            height: 80px;
+            border-radius: 40px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 50;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(20, 20, 20, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; color: rgba(255,255,255,0.4); transition: color 0.3s; }
         .nav-item.active { color: var(--accent); }
-        .nav-item i { font-size: 22px; }
-        .nav-item span { font-size: 8px; font-weight: 900; text-transform: uppercase; }
-        .dropdown-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 110; display: flex; flex-direction: column; justify-content: flex-end; }
-        .dropdown-menu { background: #1c1c1e; border-radius: 32px 32px 0 0; max-height: 80vh; overflow-y: auto; padding: 28px; }
-        .search-box { background: #2c2c2e; border-radius: 14px; padding: 16px; margin-bottom: 20px; display: flex; gap: 14px; align-items: center; }
-        .search-box input { background: transparent; border: none; outline: none; color: #fff; flex: 1; }
-        .menu-item { padding: 18px; border-radius: 16px; font-size: 15px; cursor: pointer; display: flex; align-items: center; gap: 14px; }
-        .menu-item img { width: 40px; height: 40px; object-fit: contain; }
-        .color-dot { width: 10px; height: 10px; border-radius: 3px; margin-right: 14px; }
+        .nav-item i { font-size: 24px; }
+        .nav-item span { font-size: 10px; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; }
+
+        /* Dropdowns */
+        .dropdown-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 110; display: flex; flex-direction: column; justify-content: flex-end; }
+        .dropdown-menu { background: #1c1c1e; border-radius: 32px 32px 0 0; max-height: 85vh; overflow-y: auto; padding: 24px; }
+        
+        .search-box { background: rgba(255,255,255,0.08); border-radius: 16px; padding: 14px 18px; margin-bottom: 24px; display: flex; gap: 12px; align-items: center; }
+        .search-box input { background: transparent; border: none; outline: none; color: #fff; flex: 1; font-size: 16px; }
+        
+        .menu-item { 
+            padding: 16px; 
+            border-radius: 16px; 
+            font-size: 16px; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            gap: 16px; 
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+        }
+        .menu-item:last-child { border-bottom: none; }
+        .menu-item:active { background: rgba(255,255,255,0.05); }
+        .menu-item img { width: 48px; height: 48px; object-fit: contain; }
+        
+        .color-dot { width: 12px; height: 12px; border-radius: 4px; margin-right: 14px; box-shadow: 0 0 10px rgba(255,255,255,0.2); }
+
+        /* Typography */
+        h1, h2, h3 { letter-spacing: -0.03em; }
     </style>
 </head>
 <body>
+    <div class="cinematic-bg"></div>
     <div id="app" v-cloak>
         <div class="min-h-screen max-w-md mx-auto relative pb-40">
             <header class="p-8 flex justify-between items-center">
-                <h1 class="text-2xl font-black uppercase italic">Studio Elite</h1>
+                <h1 class="text-2xl font-black uppercase italic tracking-tighter">Studio <span class="text-blue-500">Elite</span></h1>
                 <div class="flex gap-4">
-                    <button v-if="activeTab === 'constructor'" @click="saveShowcase" class="text-blue-500 font-black text-xs uppercase">Save</button>
-                    <button v-if="activeCurated" @click="activeCurated = null" class="text-gray-500 font-black text-xs uppercase">Back</button>
+                    <button v-if="activeTab === 'constructor'" @click="saveShowcase" class="text-blue-500 font-bold text-sm uppercase tracking-wide">Save</button>
+                    <button v-if="activeCurated" @click="activeCurated = null" class="text-gray-500 font-bold text-sm uppercase tracking-wide">Back</button>
                 </div>
             </header>
 
@@ -59,7 +277,7 @@
                     <div v-for="(slot, index) in slots" :key="index" @click="openPicker(index)" class="slot-card">
                         <div v-if="slot.backdrop" class="premium-bg" :style="getBgStyle(slot.backdrop)"></div>
                         <img v-if="slot.model" :src="slot.model.image_url" class="layer-gift">
-                        <div v-if="!slot.model" class="flex items-center justify-center h-full opacity-10"><i class="fa-solid fa-plus text-xl"></i></div>
+                        <div v-if="!slot.model" class="flex items-center justify-center h-full opacity-30"><i class="fa-solid fa-plus text-2xl add-icon"></i></div>
                     </div>
                 </div>
             </main>
@@ -68,30 +286,30 @@
                 <div v-if="!activeCurated">
                     <div v-for="col in curatedList" :key="col.title" @click="activeCurated = col" class="curated-card">
                         <div class="flex items-center">
-                            <div v-if="col.color" class="color-dot" :style="{background: col.color}"></div>
+                            <div v-if="col.color" class="color-dot" :style="{background: col.color, boxShadow: `0 0 12px ${col.color}`}"></div>
                             <div class="curated-title">{{ col.title }}</div>
                         </div>
                         <div class="curated-tag">{{ col.tag }}</div>
                     </div>
                 </div>
                 <div v-else>
-                    <h2 class="text-2xl font-black uppercase italic text-center mb-8">{{ activeCurated.title }}</h2>
+                    <h2 class="text-2xl font-black uppercase italic text-center mb-8 tracking-tighter">{{ activeCurated.title }}</h2>
                     <div class="grid grid-cols-2 gap-4">
-                        <div v-for="gift in curatedGifts" :key="gift.id" @click="applyCurated(gift)" class="slot-card p-4 flex items-center justify-center bg-[#1c1c1e]">
-                            <img :src="gift.image_url" class="w-full h-full object-contain">
+                        <div v-for="gift in curatedGifts" :key="gift.id" @click="applyCurated(gift)" class="slot-card p-4 flex items-center justify-center bg-white/5 border border-white/10">
+                            <img :src="gift.image_url" class="w-full h-full object-contain drop-shadow-2xl">
                         </div>
                     </div>
                 </div>
             </main>
 
             <main v-if="activeTab === 'collections'" class="px-6 space-y-4">
-                <div v-for="sc in vault" :key="sc.id" @click="loadShowcase(sc)" class="bg-[#1c1c1e] p-5 rounded-3xl flex items-center gap-5">
+                <div v-for="sc in vault" :key="sc.id" @click="loadShowcase(sc)" class="curated-card">
                     <div class="flex-1 font-bold text-sm">{{ sc.name }}</div>
-                    <i class="fa-solid fa-chevron-right text-gray-800"></i>
+                    <i class="fa-solid fa-chevron-right text-gray-600 text-xs"></i>
                 </div>
             </main>
 
-            <nav class="nav-bar glass-card">
+            <nav class="nav-bar">
                 <div @click="activeTab = 'constructor'" :class="{'active': activeTab === 'constructor'}" class="nav-item"><i class="fa-solid fa-compass-drafting"></i><span>Builder</span></div>
                 <div @click="activeTab = 'themed'; activeCurated = null" :class="{'active': activeTab === 'themed'}" class="nav-item"><i class="fa-solid fa-layer-group"></i><span>Explore</span></div>
                 <div @click="switchToVault" :class="{'active': activeTab === 'collections'}" class="nav-item"><i class="fa-solid fa-chess-rook"></i><span>Vault</span></div>
@@ -99,22 +317,46 @@
 
             <div :class="['bottom-sheet', pickerOpen ? 'open' : '']">
                 <div class="panel-header">
-                    <button @click="pickerOpen = false"><i class="fa-solid fa-xmark text-xl text-gray-600"></i></button>
-                    <h3 class="text-[16px] font-black uppercase">Настройка ячейки</h3>
-                    <i class="fa-solid fa-copy text-xl text-gray-600"></i>
+                    <button @click="pickerOpen = false" class="p-2 -ml-2"><i class="fa-solid fa-xmark text-xl text-gray-500 hover:text-white transition-colors"></i></button>
+                    <h3 class="text-[15px] font-bold uppercase tracking-widest text-gray-400">Edit Slot</h3>
+                    <div class="w-8"></div>
                 </div>
                 <div class="panel-content">
-                    <label class="label">Ссылка на NFT</label>
-                    <div class="field bg-[#242426] text-gray-500">t.me/nft/BlingBinky-371</div>
-                    <div class="btn-similar">Похожие</div>
-                    <label class="label">Подарок</label>
-                    <div class="field" @click="openMenu('base')">{{ tempSelection.baseGift || 'Выбрать' }}</div>
-                    <label class="label">Модель</label>
-                    <div class="field" @click="openMenu('model')">{{ tempSelection.model ? tempSelection.model.name.split(':')[1] : 'Выбрать' }}</div>
-                    <label class="label">Фон</label>
-                    <div class="field" @click="openMenu('backdrop')">{{ tempSelection.backdrop ? tempSelection.backdrop.name : 'Выбрать' }}</div>
+                    <label class="label">Preview</label>
+                    <div class="flex justify-center mb-8">
+                        <div class="slot-card w-32 h-32 border-accent/50 shadow-[0_0_30px_rgba(0,122,255,0.15)]">
+                            <div v-if="tempSelection.backdrop" class="premium-bg" :style="getBgStyle(tempSelection.backdrop)"></div>
+                            <img v-if="tempSelection.model" :src="tempSelection.model.image_url" class="layer-gift">
+                        </div>
+                    </div>
+
+                    <label class="label">Details</label>
+                    <div class="field group">
+                        <span class="text-sm font-medium text-gray-400">Gift Type</span>
+                        <div class="flex items-center gap-2" @click="openMenu('base')">
+                            <span class="text-white font-semibold">{{ tempSelection.baseGift || 'Select...' }}</span>
+                            <i class="fa-solid fa-chevron-right text-xs text-gray-600 group-hover:text-accent transition-colors"></i>
+                        </div>
+                    </div>
+                    <div class="field group">
+                        <span class="text-sm font-medium text-gray-400">Model</span>
+                        <div class="flex items-center gap-2" @click="openMenu('model')">
+                            <span class="text-white font-semibold">{{ tempSelection.model ? tempSelection.model.name.split(':')[1] : 'Select...' }}</span>
+                            <i class="fa-solid fa-chevron-right text-xs text-gray-600 group-hover:text-accent transition-colors"></i>
+                        </div>
+                    </div>
+                    <div class="field group">
+                        <span class="text-sm font-medium text-gray-400">Backdrop</span>
+                        <div class="flex items-center gap-2" @click="openMenu('backdrop')">
+                            <span class="text-white font-semibold">{{ tempSelection.backdrop ? tempSelection.backdrop.name : 'Select...' }}</span>
+                            <i class="fa-solid fa-chevron-right text-xs text-gray-600 group-hover:text-accent transition-colors"></i>
+                        </div>
+                    </div>
                 </div>
-                <div class="footer"><div class="btn-footer" @click="resetSlot">Сбросить</div><div class="btn-footer" @click="saveSelection">Закрыть</div></div>
+                <div class="footer">
+                    <div class="btn-footer bg-white/5 hover:bg-white/10 text-gray-300" @click="resetSlot">Reset</div>
+                    <div class="btn-footer primary shadow-[0_4px_20px_rgba(0,122,255,0.4)]" @click="saveSelection">Apply Changes</div>
+                </div>
             </div>
 
             <div class="dropdown-overlay" v-if="currentMenu" @click="currentMenu = null">
